@@ -43,14 +43,14 @@
                 var max = canvas.width;
                 var positionX = Math.floor(Math.random() * canvas.width/30) * 30;
                 var positionY = Math.floor(Math.random() * canvas.width/30) * 30;
-                console.log(positionX,positionY);
+                // console.log(positionX,positionY);
                 greenArray.push([positionX,positionY]);
             }
         }
 
         function gameLoop(){
             ctx.clearRect(0, 0, canvas.width, canvas.height); // czyszczenie
-            console.log("przyszłe pozycje:", position.x+step*2, position.y+step*2,"borders:", canvas.width,canvas.height);
+            // console.log("przyszłe pozycje:", position.x+step*2, position.y+step*2,"borders:", canvas.width,canvas.height);
             // budowanie mapy
             ctx.fillStyle = "red"; // kolor
             for(var i=0;i < 30;i++){
@@ -61,7 +61,7 @@
             // rysowanie gracza
             ctx.fillStyle = "grey"; // kolor
             ctx.fillRect(position.x,position.y,step*2,step*2); // czołg
-            console.log(position.x,position.y);
+            // ssconsole.log(position.x,position.y);
         }
         function onKeyDown(event){
             console.log(event.which, event.code);
@@ -70,13 +70,15 @@
                 case "KeyA":
                     let checkerA = false;
 
-                    for(var i=0;i < greenArray.length;i++) {
-                        if(greenArray[i][0] === position.x - step*2){
-                            if(greenArray[i][1] === position.y || greenArray[i][1] === position.y - step || greenArray[i][1] === position.y +step){
-                                checkerA = true;
+                        
+                        for(var i=0;i < greenArray.length;i++) {
+                            if(greenArray[i][0] === position.x - step*2){
+                                if(greenArray[i][1] === position.y || greenArray[i][1] === position.y - step || greenArray[i][1] === position.y + step){
+                                    checkerA = true;
+                                }
                             }
-                        }
-                    }
+                        } 
+                    
                     if(checkerA === false) {
                         position.x -= step;
                         gameLoop(); 
@@ -88,7 +90,7 @@
 
                     for(var i=0;i < greenArray.length;i++) {
                         if(greenArray[i][0] === position.x + step*2){
-                            if(greenArray[i][1] === position.y || greenArray[i][1] === position.y - step || greenArray[i][1] === position.y +step || position.x + step*2 === canvas.width ){
+                            if(greenArray[i][1] === position.y || greenArray[i][1] === position.y - step || greenArray[i][1] === position.y + step || position.x + step*2 === canvas.width ){
                                 checkerD = true;
                             }
                         }
@@ -102,13 +104,16 @@
                 case "KeyW":
                     let checkerW = false;
 
+                    if( position.y - step < 0 ){
+                        checkerW = true;
+                    }    
                     for(var i=0;i < greenArray.length;i++) {
                         if(greenArray[i][1] === position.y - step*2){
-                            if(greenArray[i][0] === position.x || greenArray[i][0] === position.x - step || greenArray[i][0] === position.x +step || position.y - step < 0 ){
+                            if(greenArray[i][0] === position.x || greenArray[i][0] === position.x - step || greenArray[i][0] === position.x + step){
                                 checkerW = true;
                             }
                         }
-                    }
+                    }                        
                     if(checkerW === false) {
                         position.y -= step;
                         gameLoop(); 

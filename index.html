@@ -70,6 +70,9 @@
                 case "KeyA":
                     let checkerA = false;
 
+                    if( position.x - step < 0){
+                        checkerA = true;
+                    }  
                         
                         for(var i=0;i < greenArray.length;i++) {
                             if(greenArray[i][0] === position.x - step*2){
@@ -88,9 +91,13 @@
                 case "KeyD":
                     let checkerD = false;
 
+                    if( position.x + step * 3 > canvas.width){
+                        checkerD = true;
+                    }    
+
                     for(var i=0;i < greenArray.length;i++) {
                         if(greenArray[i][0] === position.x + step*2){
-                            if(greenArray[i][1] === position.y || greenArray[i][1] === position.y - step || greenArray[i][1] === position.y + step || position.x + step*2 === canvas.width ){
+                            if(greenArray[i][1] === position.y || greenArray[i][1] === position.y - step || greenArray[i][1] === position.y + step){
                                 checkerD = true;
                             }
                         }
@@ -132,9 +139,14 @@
                 case "KeyS":
                     let checkerS = false;
 
+                    
+                    if( position.y + step * 3 > canvas.height){
+                        checkerS = true;
+                    }  
+
                     for(var i=0;i < greenArray.length;i++) {
                         if(greenArray[i][1] === position.y + step*2){
-                            if(greenArray[i][0] === position.x || greenArray[i][0] === position.x - step || greenArray[i][0] === position.x +step || position.y + step*2 === canvas.height){
+                            if(greenArray[i][0] === position.x || greenArray[i][0] === position.x - step || greenArray[i][0] === position.x +step){
                                 checkerS = true;
                             }
                         }

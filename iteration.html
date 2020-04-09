@@ -39,37 +39,6 @@
         
         gameLoop();
 
-        function onKeyDown(event){
-            // console.log(event.which, event.code);
-            switch(event.code){
-                case "ArrowDown":
-                    let checker = false;
-                    landArray.forEach(coords => {
-                        if(coords[0] === pos.x && coords[1] === pos.y + size){
-                            checker = true;
-                        }
-                    });
-                    if(checker === false) {
-                        pos.y += 10;
-                        gameLoop(); 
-                    }
-                break;
-                case "ArrowUp":
-                    pos.y -= 10;
-                    gameLoop()
-                break;
-                case "ArrowLeft":
-                    pos.x -= 10;
-                    gameLoop()
-                break;
-                case "ArrowRight":
-                    pos.x += 10;
-                    gameLoop()
-                break;
-            }
-            gameLoop();        
-        }
-
         function gameLoop(){
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);

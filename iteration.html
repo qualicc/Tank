@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas</title>
+    <style>
+        #canvas{
+            width:500px;
+            height:300px;
+            border:1px solid red;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="500" height="300"></canvas>
+
+    <script>
+        const canvas = document.querySelector("#canvas");
+        const ctx = canvas.getContext("2d");
+
+        document.addEventListener('keydown',onKeyDown);
+
+        let pos = {x:0,y:0};
+        let size = 10;
+        let landArray = [
+            0,0,0,1,0,0,1,1,0,0,
+            0,0,1,0,0,1,1,0,0,0,
+            0,0,0,1,1,0,0,1,0,0,
+            0,0,0,1,0,0,1,0,1,0,
+            0,1,0,0,1,0,0,1,0,0,
+            0,0,0,1,0,0,1,0,0,1,
+            0,1,0,0,0,0,0,1,1,0,
+            0,1,0,0,0,0,0,1,1,0,
+            0,1,0,0,0,0,0,1,1,0,
+            0,1,0,0,0,0,0,1,1,0,
+        ];
+
+        
+        gameLoop();
+
+        function onKeyDown(event){
+            // console.log(event.which, event.code);
+            switch(event.code){
+                case "ArrowDown":
+                    let checker = false;
+                    landArray.forEach(coords => {
+                        if(coords[0] === pos.x && coords[1] === pos.y + size){
+                            checker = true;
+                        }
+                    });
+                    if(checker === false) {
+                        pos.y += 10;
+                        gameLoop(); 
+                    }
+                break;
+                case "ArrowUp":
+                    pos.y -= 10;
+                    gameLoop()
+                break;
+                case "ArrowLeft":
+                    pos.x -= 10;
+                    gameLoop()
+                break;
+                case "ArrowRight":
+                    pos.x += 10;
+                    gameLoop()
+                break;
+            }
+            gameLoop();        
+        }
+
+        function gameLoop(){
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = 'green';
+
+            prepareBoard();
+
+            ctx.fillStyle = 'red';
+
+            ctx.fillRect(pos.x, pos.y, size, size);
+        }
+
+        function prepareBoard(){
+            let counter = 0;
+            for(let y = 0; y < landArray.length/10; y++){
+                for(let x = 0; x < landArray.length/10; x++){
+                    counter++;
+                    if(landArray[counter] !== 0){
+                        ctx.fillRect(x * size, y * size, size, size);   
+                    }         
+                }
+            }
+        }
+
+    </script>
+</body>
+</html>

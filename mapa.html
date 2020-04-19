@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tanks v0.3</title>
+    <style>
+        #canvas{
+            border:red 2px solid;
+        
+        }
+        
+        
+        </style>
+</head>
+<body>
+    <canvas id="canvas" width="300" height="300"></canvas>
+    <script>
+        document.addEventListener("keydown",onKeyDown,);
+        const canvas = document.querySelector("#canvas");
+        const ctx = canvas.getContext("2d");
+        var kierunek = 1;
+        var skok = 30;
+        var ruch = 15;
+        var cords = [];
+        var bricks = [];
+        var water = [];
+
+        // kierunek
+        //1 n
+        //2 e
+        //3 s
+        //4 w
+        var kierunek = 0;
+        //    obiekty na mapie
+        //0 droga
+        //1 cegła
+        //2 woda
+        //3 krzaki
+        //4 coś do wymyślenia
+        //5 gracz
+        //6 start gracza 
+        const lvl = [
+            [1,1,1,3,2,2,3,0,1,1],
+            [0,0,0,2,2,3,0,0,1,1],
+            [5,0,0,0,3,0,0,0,1,1],
+            [3,2,0,0,0,0,0,0,0,0],
+            [2,2,3,0,1,1,1,0,1,1],
+            [2,3,0,0,1,1,1,0,1,1],
+            [3,0,0,0,1,1,1,0,1,1],
+            [0,0,0,0,0,0,0,0,0,0],
+            [1,1,1,0,1,1,1,0,1,1],
+            [1,1,1,0,1,1,1,0,1,1],
+        ];
+        var dlugoscX = lvl.length * skok;
+        var dlugoscY = lvl.length * skok;
+        // console.log(dlugoscX,dlugoscY);
+        var count = 0;
+        buildMap();
+        function buildMap(){
+            kierunek = 2;
+            for(var j =0;j < lvl.length; j++){
+                for(var i =0;i < lvl[j].length; i++){
+                    if(lvl[j][i] === 1){
+                        ctx.fillStyle = "red";
+                        ctx.fillRect(i*skok,j*skok,skok,skok);
+                        bricks.push([i*skok,j*skok]);
+                    }else if(lvl[j][i] === 2){
+                          ctx.fillStyle = "blue";
+                         ctx.fillRect(i*skok,j*skok,skok,skok);
+                         water.push([i*skok,j*skok]);
+                    }else if(lvl[j][i] === 3){
+                          ctx.fillStyle = "green";
+                         ctx.fillRect(i*skok,j*skok,skok,skok);
+                    }else if(lvl[j][i] === 4){
+                          ctx.fillStyle = "brown";
+                         ctx.fillRect(i*skok,j*skok,skok,skok);
+                    }else if(lvl[j][i] === 0){
+                          ctx.fillStyle = "grey";
+                         ctx.fillRect(i*skok,j*skok,skok,skok);
+                    }else if(lvl[j][i] === 5){
+                        cords.push(i*skok,j*skok);
+                        ctx.fillStyle = "grey";
+                        ctx.fillRect(cords[0],cords[1],skok,skok); //tło
+                        ctx.fillStyle = "#494646";
+                        ctx.fillRect(cords[0],cords[1],skok,5); //gąska1
+                        ctx.fillRect(cords[0],cords[1]+25,skok,5); //gąska2
+                        ctx.fillStyle = "#6b6969";
+                        ctx.fillRect(cords[0]+3,cords[1]+5,22,20); //kadłub
+                        ctx.fillStyle = "#d2ced1";
+                        ctx.fillRect(cords[0]+15,cords[1]+13,15,3); //działo
+                        ctx.fillStyle = "#494646";
+                        ctx.fillRect(cords[0]+9,cords[1]+9,12,12); //wieża
+                        lvl[j][i] = 6;
+                    }
+                }
+            }
+            // console.log(cords)
+            console.log("kordy cegieł: ", bricks);
+            console.log("kordy wody: ", water);
+        }
+        function reBuildMap(){
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // czyszczenie
+            for(var j =0;j < lvl.length; j++){
+                for(var i =0;i < lvl[j].length; i++){
+                    if(lvl[j][i] === 1){
+                        ctx.fillStyle = "red";
+                        ctx.fillRect(i*skok,j*skok,skok,skok);
+                    }else if(lvl[j][i] === 2){
+                          ctx.fillStyle = "blue";
+                         ctx.fillRect(i*skok,j*skok,skok,skok);
+                    }else if(lvl[j][i] === 3){
+                          ctx.fillStyle = "green";
+                         ctx.fillRect(i*skok,j*skok,skok,skok);
+                    }else if(lvl[j][i] === 4){
+                          ctx.fillStyle = "brown";
+                         ctx.fillRect(i*skok,j*skok,skok,skok);
+                    }else if(lvl[j][i] === 0){
+                          ctx.fillStyle = "grey";
+                         ctx.fillRect(i*skok,j*skok,skok,skok);
+                    }else if(lvl[j][i] === 6){
+                          ctx.fillStyle = "grey";
+                         ctx.fillRect(i*skok,j*skok,skok,skok);
+                    }//else if(lvl[j][i] === 5){
+                    //     console.log(cords[0],cords[1]);
+                    //       ctx.fillStyle = "white";
+                    //      ctx.fillRect(cords[0],cords[1],skok,skok);
+                    // }
+                    
+                }
+
+            }
+            switch(kierunek){
+                case 1:
+                        //ctx.fillStyle = "grey";
+                        //ctx.fillRect(cords[0],cords[1],skok,skok); //tło
+                        ctx.fillStyle = "#494646";
+                        ctx.fillRect(cords[0],cords[1],5,skok); //gąska1
+                        ctx.fillRect(cords[0]+25,cords[1],5,skok); //gąska2
+                        ctx.fillStyle = "#6b6969";
+                        ctx.fillRect(cords[0]+5,cords[1]+3,20,22); //kadłub
+                        ctx.fillStyle = "#d2ced1";
+                        ctx.fillRect(cords[0]+13,cords[1]+15,3,15); //działo
+                        ctx.fillStyle = "#494646";
+                        ctx.fillRect(cords[0]+9,cords[1]+9,12,12);  //wieża
+                        //done
+                break;
+                case 2:
+                        //ctx.fillStyle = "grey";
+                        //ctx.fillRect(cords[0],cords[1],skok,skok); //tło
+                        ctx.fillStyle = "#494646";
+                        ctx.fillRect(cords[0],cords[1],skok,5); //gąska1
+                        ctx.fillRect(cords[0],cords[1]+25,skok,5); //gąska2
+                        ctx.fillStyle = "#6b6969";
+                        ctx.fillRect(cords[0]+3,cords[1]+5,22,20); //kadłub
+                        ctx.fillStyle = "#d2ced1";
+                        ctx.fillRect(cords[0]+15,cords[1]+13,15,3); //działo
+                        ctx.fillStyle = "#494646";
+                        ctx.fillRect(cords[0]+9,cords[1]+9,12,12); //wieża
+                        // done
+                break;
+                case 3:
+                        //ctx.fillStyle = "grey";
+                        //ctx.fillRect(cords[0],cords[1],skok,skok); //tło
+                        ctx.fillStyle = "#494646";
+                        ctx.fillRect(cords[0],cords[1],5,skok); //gąska1
+                        ctx.fillRect(cords[0]+25,cords[1],5,skok); //gąska2
+                        ctx.fillStyle = "#6b6969";
+                        ctx.fillRect(cords[0]+5,cords[1]+5,20,22); //kadłub
+                        ctx.fillStyle = "#d2ced1";
+                        ctx.fillRect(cords[0]+13,cords[1],3,15); //działo
+                        ctx.fillStyle = "#494646";
+                        ctx.fillRect(cords[0]+9,cords[1]+9,12,12); //wieża
+                        //done
+                break;
+                case 4:
+                        //ctx.fillStyle = "grey";
+                        //ctx.fillRect(cords[0],cords[1],skok,skok); //tło
+                        ctx.fillStyle = "#494646";
+                        ctx.fillRect(cords[0],cords[1],skok,5); //gąska1
+                        ctx.fillRect(cords[0],cords[1]+25,skok,5); //gąska2
+                        ctx.fillStyle = "#6b6969";
+                        ctx.fillRect(cords[0]+5,cords[1]+5,22,20); //kadłub
+                        ctx.fillStyle = "#d2ced1";
+                        ctx.fillRect(cords[0],cords[1]+13,15,3); //działo
+                        ctx.fillStyle = "#494646";
+                        ctx.fillRect(cords[0]+9,cords[1]+9,12,12); //wieża
+                        //done
+                break;
+
+            }
+                // console.log(cords[0],cords[1]);
+                // ctx.fillStyle = "black";
+                // ctx.fillRect(cords[0],cords[1],skok,skok);
+            //console.log(cords)
+        }
+        function onKeyDown(event){
+            // console.log(event.which, event.code);
+            switch(event.code){
+
+                case "KeyA":
+                    //let checkerA = false;
+                    if(cords[0] > 0){
+                        cords[0] = cords[0] - ruch;
+                        // console.log(cords[0]);
+                        // console.log("poszłem w lewo");
+                    // }else{
+                    //     console.log("false")
+                    }
+                    kierunek = 4;
+                    reBuildMap()
+                break;
+                
+                case "KeyD":
+                    //let checkerD = false;
+                    if(cords[0]<dlugoscX - skok){
+                        cords[0] = cords[0] + ruch;
+                        // console.log(cords[0]);
+                        // console.log("poszłem w prawo");
+                    // }else{
+                    //     console.log("false")
+                    }
+                    kierunek = 2;
+                    reBuildMap()
+                break;
+                
+                case "KeyW":
+                    let checkerW = false;
+                    if(cords[1]> 0){
+                        //console.log("przeszłem przez if nr 1");
+                        for(var i = 0;i < bricks.length;i++){
+                            console.log("wykonuje pentle");
+                            if(bricks[i][1] === cords[1] || bricks[i][1] === cords[1] - ruch || bricks[i][1] === cords[1] + step ){
+                                console.log("prawda bo dwie cyfry są takie same",bricks[i][1], cords[1], cords[1] - ruch, cords[1] + step);
+                                checkerW = true;
+                            }
+                        }
+                        
+                    }else{
+                         console.log("nie wyjde poza mape")
+                    }
+                    if(checkerW === false){
+                        cords[1] = cords[1] - ruch;
+                        console.log("poszłem w góre");  
+                    }
+                    kierunek = 3;
+                    reBuildMap()
+                break;
+
+                // case "KeyW":
+                //     //let checkerW = false;
+                //     if(cords[1]> 0){
+                //         cords[1] = cords[1] - ruch;
+                //         // console.log(cords[1]);
+                //         // console.log("poszłem w góre");
+                //     // }else{
+                //     //     console.log("false")
+                //     }
+                //     kierunek = 3;
+                //     reBuildMap()
+                // break;
+
+                case "KeyS":
+                    //let checkerS = false;
+                    if(cords[1]<dlugoscY- skok){
+                        cords[1] = cords[1] + ruch;
+                        // console.log(cords[1]);
+                        // console.log("poszłem w dół");
+                    // }else{
+                    //     console.log("false")
+                    }
+                    kierunek = 1;
+                    reBuildMap()
+                break;
+
+                case "Space":
+                    
+                break;
+            }
+        }
+        
+        // var obiekt = [0,1,2];
+
+        // function kordy(){
+        //     console.log("wykonuje");
+        //     for (i=0;i < canvas.height; i +=skok){
+        //         console.log("tworze y");
+        //         for(i2 = 0;i2 < canvas.width; i2 += skok){
+        //             cords.push ([i2,i]);
+        //             console.log("dodaje");
+        //         }
+        //     }
+        // }
+        // function lvl();{
+        //     var lvl1 = 
+        // }
+        // console.log (lvl);
+    </script>
+    <br>
+    v0.2 <br>
+        -model pojazdu <br>
+        -obracanie modelu względem ruchu <br>
+    v0.1 <br>
+        -mapa<br> 
+        -poruszanie sie<br>
+        -zablokowane granice<br>
+</body>
+</html>

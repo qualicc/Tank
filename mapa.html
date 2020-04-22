@@ -25,7 +25,7 @@
         var cords = [];
         var bricks = [];
         var water = [];
-
+        var shot = 0;
         // kierunek
         //1 n
         //2 e
@@ -54,8 +54,8 @@
         ];
         var dlugoscX = lvl.length * skok;
         var dlugoscY = lvl.length * skok;
-        // console.log(dlugoscX,dlugoscY);
         var count = 0;
+        var startShot = 0;
         buildMap();
         function buildMap(){
             kierunek = 2;
@@ -95,11 +95,9 @@
                     }
                 }
             }
-            // console.log(cords)
-            console.log("kordy cegieł: ", bricks);
-            console.log("kordy wody: ", water);
         }
         function reBuildMap(){
+            update = setInterval(reBuildMap, 3000);
             ctx.clearRect(0, 0, canvas.width, canvas.height); // czyszczenie
             for(var j =0;j < lvl.length; j++){
                 for(var i =0;i < lvl[j].length; i++){
@@ -121,11 +119,7 @@
                     }else if(lvl[j][i] === 6){
                           ctx.fillStyle = "grey";
                          ctx.fillRect(i*skok,j*skok,skok,skok);
-                    }//else if(lvl[j][i] === 5){
-                    //     console.log(cords[0],cords[1]);
-                    //       ctx.fillStyle = "white";
-                    //      ctx.fillRect(cords[0],cords[1],skok,skok);
-                    // }
+                    }
                     
                 }
 
@@ -143,8 +137,8 @@
                         ctx.fillRect(cords[0]+13,cords[1]+15,3,15); //działo
                         ctx.fillStyle = "#494646";
                         ctx.fillRect(cords[0]+9,cords[1]+9,12,12);  //wieża
-                        //done
-                break;
+               break;
+
                 case 2:
                         //ctx.fillStyle = "grey";
                         //ctx.fillRect(cords[0],cords[1],skok,skok); //tło
@@ -157,8 +151,8 @@
                         ctx.fillRect(cords[0]+15,cords[1]+13,15,3); //działo
                         ctx.fillStyle = "#494646";
                         ctx.fillRect(cords[0]+9,cords[1]+9,12,12); //wieża
-                        // done
                 break;
+
                 case 3:
                         //ctx.fillStyle = "grey";
                         //ctx.fillRect(cords[0],cords[1],skok,skok); //tło
@@ -171,8 +165,8 @@
                         ctx.fillRect(cords[0]+13,cords[1],3,15); //działo
                         ctx.fillStyle = "#494646";
                         ctx.fillRect(cords[0]+9,cords[1]+9,12,12); //wieża
-                        //done
                 break;
+
                 case 4:
                         //ctx.fillStyle = "grey";
                         //ctx.fillRect(cords[0],cords[1],skok,skok); //tło
@@ -185,118 +179,176 @@
                         ctx.fillRect(cords[0],cords[1]+13,15,3); //działo
                         ctx.fillStyle = "#494646";
                         ctx.fillRect(cords[0]+9,cords[1]+9,12,12); //wieża
-                        //done
                 break;
 
             }
-                // console.log(cords[0],cords[1]);
-                // ctx.fillStyle = "black";
-                // ctx.fillRect(cords[0],cords[1],skok,skok);
-            //console.log(cords)
+
+            switch(shot){
+                case 1:
+                    switch(kierunek){
+                        case 1:
+                            var cordsAmmo = [];
+                            if(startShot === 0){
+                             cordsAmmo.push(cords[0]+13,cords[1]+28);
+                             startShot = 1;
+                            }
+
+                            ctx.fillStyle = "orange";
+                            ctx.fillRect(cordsAmmo[0],cordsAmmo[1],3,5);
+                            cordsAmmo[1]++;
+                            if(canvas.height === cordsAmmo[1]+5){
+                                startShot = 0;
+                            }
+                    }
+                break;
+            }
+            console.log("update");
         }
         function onKeyDown(event){
-            // console.log(event.which, event.code);
             switch(event.code){
 
                 case "KeyA":
-                    //let checkerA = false;
-                    if(cords[0] > 0){
-                        cords[0] = cords[0] - ruch;
-                        // console.log(cords[0]);
-                        // console.log("poszłem w lewo");
-                    // }else{
-                    //     console.log("false")
-                    }
-                    kierunek = 4;
-                    reBuildMap()
-                break;
-                
-                case "KeyD":
-                    //let checkerD = false;
-                    if(cords[0]<dlugoscX - skok){
-                        cords[0] = cords[0] + ruch;
-                        // console.log(cords[0]);
-                        // console.log("poszłem w prawo");
-                    // }else{
-                    //     console.log("false")
-                    }
-                    kierunek = 2;
-                    reBuildMap()
-                break;
-                
-                case "KeyW":
-                    let checkerW = false;
-                    if(cords[1]> 0){
-                        //console.log("przeszłem przez if nr 1");
+                let checkerA = false;
+                    if(cords[0]> 0){
                         for(var i = 0;i < bricks.length;i++){
-                            console.log("wykonuje pentle");
-                            if(bricks[i][1] === cords[1] || bricks[i][1] === cords[1] - ruch || bricks[i][1] === cords[1] + step ){
-                                console.log("prawda bo dwie cyfry są takie same",bricks[i][1], cords[1], cords[1] - ruch, cords[1] + step);
-                                checkerW = true;
+                            if(bricks[i][0] === cords[0] - skok){
+                                if(bricks[i][1] === cords[1] || bricks[i][1] === cords[1] - ruch || bricks[i][1] === cords[1] + ruch ){
+                                    checkerA = true;
+                                }
                             }
                         }
                         
                     }else{
-                         console.log("nie wyjde poza mape")
+                        checkerA = true;
                     }
+                    for(var i = 0;i < water.length;i++){
+                            if(water[i][0] === cords[0] - skok){
+                                if(water[i][1] === cords[1] || water[i][1] === cords[1] - ruch || water[i][1] === cords[1] + ruch ){
+                                    checkerA = true;
+                                }
+                        }
+                        
+                    }
+
+                    if(checkerA === false){
+                        cords[0] = cords[0] - ruch;
+                    }
+                    kierunek = 4;
+                    reBuildMap()
+                break;
+
+                case "KeyD":
+                let checkerD = false;
+                    if(cords[0]<dlugoscX - skok){
+                        for(var i = 0;i < bricks.length;i++){
+                            if(bricks[i][0] === cords[0] + skok){
+                                if(bricks[i][1] === cords[1] || bricks[i][1] === cords[1] - ruch || bricks[i][1] === cords[1] + ruch ){
+                                    checkerD = true;
+                                }
+                            }
+                        }
+                        
+                    }else{
+                        checkerD = true;
+                    }
+
+                    for(var i = 0;i < water.length;i++){
+                            if(water[i][0] === cords[0] + skok){
+                                if(water[i][1] === cords[1] || water[i][1] === cords[1] - ruch || water[i][1] === cords[1] + ruch ){
+                                    checkerD = true;
+                                }
+                            }
+                        }
+
+                    if(checkerD === false){
+                        cords[0] = cords[0] + ruch;
+                    }
+                    kierunek = 2;
+                    reBuildMap()
+                break;
+
+                case "KeyW":
+                    let checkerW = false;
+                    if(cords[1]> 0){
+                        for(var i = 0;i < bricks.length;i++){
+                            if(bricks[i][1] === cords[1] - skok){
+                                if(bricks[i][0] === cords[0] || bricks[i][0] === cords[0] - ruch || bricks[i][0] === cords[0] + ruch ){
+                                    checkerW = true;
+                                }
+                            }
+                        }
+                        
+                    }else{
+                        checkerW = true;
+                    }
+
+                    for(var i = 0;i < water.length;i++){
+                            if(water[i][1] === cords[1] - skok){
+                                if(water[i][0] === cords[0] || water[i][0] === cords[0] - ruch || water[i][0] === cords[0] + ruch ){
+                                    checkerW = true;
+                                }
+                            }
+                        }
+
+
                     if(checkerW === false){
                         cords[1] = cords[1] - ruch;
-                        console.log("poszłem w góre");  
                     }
                     kierunek = 3;
                     reBuildMap()
                 break;
 
-                // case "KeyW":
-                //     //let checkerW = false;
-                //     if(cords[1]> 0){
-                //         cords[1] = cords[1] - ruch;
-                //         // console.log(cords[1]);
-                //         // console.log("poszłem w góre");
-                //     // }else{
-                //     //     console.log("false")
-                //     }
-                //     kierunek = 3;
-                //     reBuildMap()
-                // break;
-
                 case "KeyS":
-                    //let checkerS = false;
+                let checkerS = false;
                     if(cords[1]<dlugoscY- skok){
+                        for(var i = 0;i < bricks.length;i++){
+                            if(bricks[i][1] === cords[1] + skok){
+                                if(bricks[i][0] === cords[0] || bricks[i][0] === cords[0] - ruch || bricks[i][0] === cords[0] + ruch ){
+                                    checkerS = true;
+                                }
+                            }
+                        }
+                        
+                    }else{
+                        checkerS = true;
+                    }
+
+                    for(var i = 0;i < water.length;i++){
+                            if(water[i][1] === cords[1] + skok){
+                                if(water[i][0] === cords[0] || water[i][0] === cords[0] - ruch || water[i][0] === cords[0] + ruch ){
+                                    checkerS = true;
+                                }
+                            }
+                        }
+
+                    if(checkerS === false){
                         cords[1] = cords[1] + ruch;
-                        // console.log(cords[1]);
-                        // console.log("poszłem w dół");
-                    // }else{
-                    //     console.log("false")
+
                     }
                     kierunek = 1;
                     reBuildMap()
                 break;
 
                 case "Space":
-                    
+                    shot = 1;
                 break;
             }
         }
-        
-        // var obiekt = [0,1,2];
-
-        // function kordy(){
-        //     console.log("wykonuje");
-        //     for (i=0;i < canvas.height; i +=skok){
-        //         console.log("tworze y");
-        //         for(i2 = 0;i2 < canvas.width; i2 += skok){
-        //             cords.push ([i2,i]);
-        //             console.log("dodaje");
-        //         }
+        // function UPDATE(){
+        //     update = setInterval(UPDATE, 60);
+        //     console.log("update");
+        //     var i=0;
+        //     if(i === 1000){
+        //         break;
+        //     }else{
+        //         i++;
         //     }
         // }
-        // function lvl();{
-        //     var lvl1 = 
-        // }
-        // console.log (lvl);
+
     </script>
     <br>
+    v0.3<br>
+        -zablokowanie poruszania przez cegły i wode<br>
     v0.2 <br>
         -model pojazdu <br>
         -obracanie modelu względem ruchu <br>

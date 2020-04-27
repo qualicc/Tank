@@ -15,6 +15,8 @@
 </head>
 <body>
     <canvas id="canvas" width="300" height="300"></canvas>
+    <button type="button" id="normal" onclick=gameMode()>normal mode</button>
+    <button type="button" id="test" onclick=gameMode()>test mode</button>
     <script>
         document.addEventListener("keydown",onKeyDown,);
         const canvas = document.querySelector("#canvas");
@@ -27,9 +29,9 @@
         var water = [];
         var shot = 0;
         // kierunek
-        //1 n
+        //1 s
         //2 e
-        //3 s
+        //3 n
         //4 w
         var kierunek = 0;
         //    obiekty na mapie
@@ -40,7 +42,7 @@
         //4 coś do wymyślenia
         //5 gracz
         //6 start gracza 
-        const lvl = [
+        const normal = [
             [1,1,1,3,2,2,3,0,1,1],
             [0,0,0,2,2,3,0,0,1,1],
             [5,0,0,0,3,0,0,0,1,1],
@@ -51,13 +53,39 @@
             [0,0,0,0,0,0,0,0,0,0],
             [1,1,1,0,1,1,1,0,1,1],
             [1,1,1,0,1,1,1,0,1,1],
+        ];//lvl to test
+        const lvl = [
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [5,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,1,0,0,0],
+            [0,0,0,0,0,1,1,0,0,0],
+            [0,0,0,0,1,1,1,0,0,0],
+            [0,0,0,0,0,0,0,0,1,0],
+            [0,0,0,0,0,0,0,1,1,0],
+            [0,0,0,0,0,0,1,1,1,0],
         ];
         var dlugoscX = lvl.length * skok;
         var dlugoscY = lvl.length * skok;
         var count = 0;
         var startShot = 0;
+        let updateInterval = null;
+        let shoots = [];
+        let speed = 1;
+        let rateShoot = 100;
+        var gameMode;
         buildMap();
+        mainLoop();
+        function mainLoop(){
+            updateInterval = setInterval(reBuildMap, 1);
+        }
+        function gameMode(){
+            if()
+        }
+
         function buildMap(){
+            
             kierunek = 2;
             for(var j =0;j < lvl.length; j++){
                 for(var i =0;i < lvl[j].length; i++){
@@ -97,7 +125,12 @@
             }
         }
         function reBuildMap(){
-            update = setInterval(reBuildMap, 3000);
+
+            if(rateShoot <100){
+                rateShoot++;
+
+            }
+
             ctx.clearRect(0, 0, canvas.width, canvas.height); // czyszczenie
             for(var j =0;j < lvl.length; j++){
                 for(var i =0;i < lvl[j].length; i++){
@@ -182,28 +215,84 @@
                 break;
 
             }
+            for(let i= 0;i < shoots.length;i++ ){
+                ctx.fillStyle = "orange";
+                switch(shoots[i].dir){
+                    case 1:
+                        shoots[i].y += speed;
+                        ctx.fillRect(shoots[i].x,shoots[i].y+20,3,5);
+                    break;
+                    case 2:
+                        shoots[i].x += speed;
+                        ctx.fillRect(shoots[i].x+7,shoots[i].y+13,5,3);
+                    break;
+                    case 3:
+                        shoots[i].y -= speed;
+                        ctx.fillRect(shoots[i].x,shoots[i].y+5,3,5);
+                    break;
+                    case 4:
+                        shoots[i].x -= speed;
+                        ctx.fillRect(shoots[i].x-7,shoots[i].y+13,5,3);
+                    break;
 
-            switch(shot){
+                }
+                
+
+                if(checkColision(shoots[i]) === true){
+                    shoots.splice(i,1);
+                }  
+            }
+
+        }
+
+        function checkColision(shoot){ 
+            if(shoot.y > canvas.height || shoot.y < 0 || shoot.x < 0 || shoot.x > canvas.width){   
+                return true;         
+            }
+            switch(shoot.dir){
                 case 1:
-                    switch(kierunek){
-                        case 1:
-                            var cordsAmmo = [];
-                            if(startShot === 0){
-                             cordsAmmo.push(cords[0]+13,cords[1]+28);
-                             startShot = 1;
+                    for(var i = 0; i <bricks.length;i++){
+                        if(shoot.y+25 === bricks[i][1]){
+                            if(shoot.x-13 ===bricks[i][0] ||shoot.x+2 === bricks[i][0] ||shoot.x-28 ===bricks[i][0]){
+                                return true;
                             }
-
-                            ctx.fillStyle = "orange";
-                            ctx.fillRect(cordsAmmo[0],cordsAmmo[1],3,5);
-                            cordsAmmo[1]++;
-                            if(canvas.height === cordsAmmo[1]+5){
-                                startShot = 0;
+                        }
+                    }//working
+                break;
+                case 2:
+                for(var i = 0; i <bricks.length;i++){
+                        console.log(shoots.y);
+                        if(shoot.x+12 === bricks[i][1]){
+                            
+                            if(shoot.y ===bricks[i][0] ||shoot.y+15 === bricks[i][0] ||shoot.y-15 ===bricks[i][0]){
+                                
+                                return true;
                             }
+                        }
+                    }//working?
+                break;
+                case 3:
+                    for(var i = 0; i <bricks.length;i++){
+                        if(shoot.y-25 === bricks[i][1]){
+                            if(shoot.x-13 ===bricks[i][0] ||shoot.x+2 === bricks[i][0] ||shoot.x-28 ===bricks[i][0]){
+                                return true;
+                            }
+                        }
+                    }//working
+                break;
+                case 4:
+                for(var i = 0; i <bricks.length;i++){
+                    
+                        if(shoot.x-37 === bricks[i][1]){
+                            if(shoot.y ===bricks[i][0] ||shoot.y+15 === bricks[i][0] ||shoot.y-15 ===bricks[i][0]){
+                                return true;
+                            }
+                        }
                     }
                 break;
             }
-            console.log("update");
         }
+
         function onKeyDown(event){
             switch(event.code){
 
@@ -234,7 +323,7 @@
                         cords[0] = cords[0] - ruch;
                     }
                     kierunek = 4;
-                    reBuildMap()
+                    // reBuildMap()
                 break;
 
                 case "KeyD":
@@ -264,7 +353,7 @@
                         cords[0] = cords[0] + ruch;
                     }
                     kierunek = 2;
-                    reBuildMap()
+                    // reBuildMap()
                 break;
 
                 case "KeyW":
@@ -295,7 +384,7 @@
                         cords[1] = cords[1] - ruch;
                     }
                     kierunek = 3;
-                    reBuildMap()
+                    // reBuildMap()
                 break;
 
                 case "KeyS":
@@ -326,11 +415,21 @@
 
                     }
                     kierunek = 1;
-                    reBuildMap()
+                    // reBuildMap()
                 break;
 
                 case "Space":
-                    shot = 1;
+                    if(rateShoot === 100){
+                        shot = 1;
+                        let shiftX,shiftY = 0;
+                        shoots.push({x:cords[0]+13,y:cords[1],dir:kierunek});
+                        rateShoot = 0;
+                    }
+                     
+                break;
+
+                case "KeyF":
+                    endGame()
                 break;
             }
         }
@@ -345,6 +444,12 @@
         //     }
         // }
 
+        function endGame(){
+            clearInterval(updateInterval); //wywołąnie ekranu końcowego
+            // todo 6 na 5
+
+        }
+        
     </script>
     <br>
     v0.3<br>

@@ -78,6 +78,7 @@
         var gameMode = test;
         var dlugoscX = gameMode.length * skok;
         var dlugoscY = gameMode.length * skok;
+
         buildMap();
         mainLoop();
         function mainLoop(){
@@ -138,7 +139,7 @@
             }
         }
         function reBuildMap(){
-
+            //console.log(cords[0],cords[1]);
             if(rateShoot <100){
                 rateShoot++;
 
@@ -147,10 +148,10 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height); // czyszczenie
             for(var j =0;j < gameMode.length; j++){
                 for(var i =0;i < gameMode[j].length; i++){
-                    // if(gameMode[j][i] === 1){
-                    //     ctx.fillStyle = "red";
-                    //     ctx.fillRect(i*skok,j*skok,skok,skok);}
-                    if(gameMode[j][i] === 2){
+                    if(gameMode[j][i] === 1){
+                        ctx.fillStyle = "red";
+                        ctx.fillRect(i*skok,j*skok,skok,skok);
+                    }else if(gameMode[j][i] === 2){
                           ctx.fillStyle = "blue";
                          ctx.fillRect(i*skok,j*skok,skok,skok);
                     }else if(gameMode[j][i] === 3){
@@ -170,13 +171,13 @@
                 }
 
             }
-            for(var k =0;k ===bricks.length;i++){
-                        ctx.fillStyle = "red";
-                        ctx.fillRect(bricks[k][0],bricks[k][1],skok,skok);
+            // for(var k =0;k ===bricks.length;i++){
+            //             ctx.fillStyle = "red";
+            //             ctx.fillRect(bricks[k][0],bricks[k][1],skok,skok);
                        
-                        }
+            //             }
                         
-                    }
+                    
             switch(kierunek){
                 case 1:
                         //ctx.fillStyle = "grey";
@@ -256,14 +257,14 @@
                     break;
 
                 }
-                
+               
 
                 if(checkColision(shoots[i]) === true){
                     shoots.splice(i,1);
                 }  
-            }
+            } 
             console.log(score);
-        
+        }
 
         function checkColision(shoot){ 
             if(shoot.y > canvas.height || shoot.y < 0 || shoot.x < 0 || shoot.x > canvas.width){   

@@ -9,7 +9,14 @@
             border:red 2px solid;
         
         }
-        
+        #overlay{
+            position:absolute;
+            top:0;
+            left:0;
+            width:100vw;
+            height:100vh;
+            background:#fff9;
+        }
         
         </style>
 </head>
@@ -18,10 +25,19 @@
     <canvas id="canvas" width="300" height="300"></canvas>
     <button type="button" id="normal" onclick=game(this)>normal mode</button>
     <button type="button" id="test" onclick=game(this)>test mode</button>
+
+    <div id="overlay">
+        <h1 id="message">Press Space to play</h1>
+    </div>
     <script>
+        const message = document.querySelector('#message');
+        const overlay = document.querySelector('#overlay');
         document.addEventListener("keydown",onKeyDown,);
+        document.addEventListener('DOMContentLoaded',init);
         const canvas = document.querySelector("#canvas");
         const ctx = canvas.getContext("2d");
+
+        let pause = true;
         var kierunek = 1;
         var skok = 30;
         var ruch = 15;
@@ -44,6 +60,8 @@
         //5 gracz
         //6 start gracza 
         //7
+
+
         const lvl1 = [
             [1,1,1,3,2,2,3,0,1,1],
             [0,0,0,2,2,3,0,0,1,1],
@@ -74,15 +92,19 @@
         let shoots = [];
         var enemies = [];
         let speed = 1;
-        let rateShoot = 100;
+        let rateShoot = 0;
         var gameMode = test;
         var dlugoscX = gameMode.length * skok;
         var dlugoscY = gameMode.length * skok;
 
-        buildMap();
-        mainLoop();
-        function mainLoop(){
-            updateInterval = setInterval(reBuildMap, 1);
+
+        function init(){
+            buildMap();            
+        }
+
+        function startGame(){
+            updateInterval = setInterval(reBuildMap, 10);
+            overlay.style.display = 'none';
             //console.log("update Start");
         }
         function game(what){
@@ -322,7 +344,6 @@
         function onKeyDown(event){
             console.log(event.code);
             switch(event.code){
-
                 case "KeyA":
                 let checkerA = false;
                     if(cords[0]> 0){
@@ -447,13 +468,18 @@
                 break;
 
                 case "Space":
-                    if(rateShoot === 100){
-
-                        let shiftX,shiftY = 0;
-                        shoots.push({x:cords[0]+13,y:cords[1],dir:kierunek});
-                        rateShoot = 0;
-                    }
-                     
+                    if(pause === true){
+                        pause = false;
+                        clearInterval(updateInterval);
+                        startGame();
+                    } else {
+                        if(rateShoot < 10){
+                            let shiftX,shiftY = 0;
+                            shoots.push({x:cords[0]+13,y:cords[1],dir:kierunek});
+                        } else {
+                            rateShoot = 0;
+                        }
+                    } 
                 break;
 
                 case "KeyF":
@@ -464,10 +490,16 @@
 
         function endGame(){
             clearInterval(updateInterval); //wywołąnie ekranu końcowego
+            setMessage('GAME OVER');
             // todo 6 na 5
             //zmienić rysowanie mapy 
             //sprawdzenie czy jest już koniec do rebulida
 
+        }
+
+        function setMessage(text){
+            text = 'oooo';
+            message.textContent = text;
         }
         
     </script>

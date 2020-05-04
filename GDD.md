@@ -2,13 +2,11 @@
 gra inspirowana grą tank 1990 
 
 sterowanie:
--obrót o 90° 
+-obrót
 -porusznanie przód tył
 -poruszanie o pół pola 
--zmiana pozycji obietku jest płynną animacją
 
 mapa:
--losowa
 -5 typy obiektów 
   - woda 
     -niemożliwa do przejechania 
@@ -33,4 +31,3 @@ warynki wygranej:
   
 warunki przegranej:
   -otrzymanie danej ilości strzałów od przeciwników
-  -zniczenie bazy

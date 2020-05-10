@@ -278,16 +278,18 @@
                     shoots.splice(i,1);
                 }  
             } 
-            console.log(gameMode,skok);
+            // console.log(gameMode,skok); d 
             displayArray.textContent = bricks;
         
         }
         function checkColision(shoot){ 
+
             if(shoot.y > canvas.height || shoot.y < 0 || shoot.x < 0 || shoot.x > canvas.width){   
                 return true;         
             }
             switch(shoot.dir){
                 case 1:
+                
                     for(var i = 0; i <bricks.length;i++){
                         if(shoot.y+25 === bricks[i][1]){
                             if(shoot.x-13 ===bricks[i][0] ||shoot.x+2 === bricks[i][0] ||shoot.x-28 ===bricks[i][0]){
@@ -302,18 +304,19 @@
                 break;
                 case 2:
                 for(var i = 0; i <bricks.length;i++){
-                        if(shoot.x+12 === bricks[i][1]){                            
+                        if(shoot.x+12 === bricks[i][1]){    
+                            console.log(i,bricks[i])
                             if(shoot.y ===bricks[i][0] ||shoot.y+15 === bricks[i][0] ||shoot.y-15 ===bricks[i][0]){
                                 bricks.splice(i,1);
                                 score++;
-                                console.log(bricks[i][0],bricks[i][1])
+                                // console.log(bricks[i][0],bricks[i][1]);
                                 return true;
                             }
                         }
                     }//!working v2
                 break;
                 case 3:
-                    for(var i = 0; i <bricks.length;i++){
+                    for(var i = 0; i < bricks.length; i++){
                         if(shoot.y-25 === bricks[i][1]){
                             if(shoot.x-13 ===bricks[i][0] ||shoot.x+2 === bricks[i][0] ||shoot.x-28 ===bricks[i][0]){
                                 bricks.splice(i,1);
@@ -468,6 +471,7 @@
                 break;
 
                 case "Space":
+                    console.log('shoot ');
                     if(rateShoot === 100){
 
                         let shiftX,shiftY = 0;

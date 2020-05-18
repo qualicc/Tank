@@ -3,166 +3,508 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TANKS GAME</title>
-<style>
-#canvas{
-    border:red 2px solid;
-
-}
-
-
-</style>
-
-
+    <title>tanks v0.6</title>
+    <style>
+        #canvas{
+            border:red 2px solid;
+        
+        }
+        
+        
+        </style>
 </head>
-
 <body>
-    <canvas id="canvas" width="900" height="600">
-
-    </canvas>
-
+    <div id="score">0</div>
+    <canvas id="canvas" width="300" height="300"></canvas>
+    <button type="button" id="normal" onclick=game(this)>normal mode</button>
+    <button type="button" id="test" onclick=game(this)>test mode</button>
+    <div id="displayArray" ><!--<pre>tekst</pre></div>-->
     <script>
         document.addEventListener("keydown",onKeyDown,);
+        const displayArray = document.querySelector("#displayArray > pre");
         const canvas = document.querySelector("#canvas");
+        const scoreElement = document.querySelector("#score");
         const ctx = canvas.getContext("2d");
+        var kierunek = 1;
+        var skok = 30;
+        var ruch = 15;
+        var cords = [];
+        var bricks = [];
+        var water = [];
+        var score = 0;
+        // kierunek
+        //1 s
+        //2 e
+        //3 n
+        //4 w
 
+        //    obiekty na mapie
+        //0 droga
+        //1 cegła
+        //2 woda
+        //3 krzaki
+        //4 coś do wymyślenia
+        //5 gracz
+        //6 start gracza 
+        //7
+        const lvl1 = [
+            [1,1,1,3,2,2,3,0,1,1],
+            [0,0,0,2,2,3,0,0,1,1],
+            [5,0,0,0,3,0,0,0,1,1],
+            [3,2,0,0,0,0,0,0,0,0],
+            [2,2,3,0,1,1,1,0,1,1],
+            [2,3,0,0,1,1,1,0,1,1],
+            [3,0,0,0,1,1,1,0,1,1],
+            [0,0,0,0,0,0,0,0,0,0],
+            [1,1,1,0,1,1,1,0,1,1],
+            [1,1,1,0,1,1,1,0,1,1],
+        ];//lvl to test
+        const test = [
+            [1,0,0,0,0,0,0,0,0,0],
+            [0,1,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [5,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,1,0,0,0],
+            [0,0,0,0,0,1,1,0,0,0],
+            [0,0,0,0,1,1,1,0,0,0],
+            [0,0,0,0,0,0,0,0,1,0],
+            [0,0,0,0,0,0,0,1,1,0],
+            [0,0,0,0,0,4,1,1,1,0],
+        ];
+        var count = 0;
+        var startShot = 0;
+        let updateInterval = null;
+        let shoots = [];
+        var enemies = [];
+        let speed = 1;
+        let rateShoot = 10;
+        var gameMode = test;
+        var dlugoscX = gameMode.length * skok;
+        var dlugoscY = gameMode.length * skok;
+        var bots = [];
+        var rate = 0;
+        start();
+        mainLoop();
 
-        const player = document.querySelector('#player');
-
-        let step = 15;
-
-        var position = {x:0,y:0};
-        var greenArray = [];
-        prepareMap();
-        gameLoop();
-        //let moveInterval = setInterval(move,100);
-
-        function prepareMap(){
-            for(var i=0;i < 30; i++){
-                var min = 0;
-                var max = canvas.width;
-                var positionX = Math.floor(Math.random() * canvas.width/30) * 30;
-                var positionY = Math.floor(Math.random() * canvas.width/30) * 30;
-                // console.log(positionX,positionY);
-                greenArray.push([positionX,positionY]);
+        function mainLoop(){
+            updateInterval = setInterval(update, 1);
+            //console.log("update Start");
+        }
+        function game(what){
+            if(what.id === "test"){
+                gameMode = test;
+                start()
+            }else if(what.id === "normal"){
+                gameMode = lvl1;
+                start()
             }
         }
 
-        function gameLoop(){
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // czyszczenie
-            // console.log("przyszłe pozycje:", position.x+step*2, position.y+step*2,"borders:", canvas.width,canvas.height);
-            // budowanie mapy
-            ctx.fillStyle = "red"; // kolor
-            for(var i=0;i < 30;i++){
-            // ctx.fillRect(greenArray[i[0]],greenArray[i[1]],step*2,step*2);
-            ctx.fillRect(greenArray[i][0],greenArray[i][1],step*2,step*2);
-            // console.log(greenArray[i]); //box mapa
+        function start(){
+            
+            ctx.fillStyle = "grey";
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            bricks =[];
+            water = [];
+            kierunek = 2;
+            for(var j =0;j < gameMode.length; j++){
+                for(var i =0;i < gameMode[j].length; i++){
+                    if(gameMode[j][i] === 1){
+                        ctx.fillStyle = "red";
+                        ctx.fillRect(i*skok,j*skok,skok,skok);
+                        bricks.push([i*skok,j*skok]);
+                    }else if(gameMode[j][i] === 2){
+                        ctx.fillStyle = "blue";
+                        ctx.fillRect(i*skok,j*skok,skok,skok);
+                        water.push([i*skok,j*skok]);
+                    }else if(gameMode[j][i] === 3){
+                        ctx.fillStyle = "green";
+                        ctx.fillRect(i*skok,j*skok,skok,skok);
+                    }else if(gameMode[j][i] === 4){
+                        //ctx.fillStyle = "brown";
+                        bots.push([i*skok,j*skok,1,false]);
+                        drawTank(i*skok,j*skok,1,false)
+                        //ctx.fillRect(i*skok,j*skok,skok,skok);
+                    }else if(gameMode[j][i] === 0){
+                        ctx.fillStyle = "grey";
+                        ctx.fillRect(i*skok,j*skok,skok,skok);
+                    }else if(gameMode[j][i] === 5){
+                        cords.push(i*skok,j*skok,2,true);
+                        ctx.fillStyle = "grey";
+                        ctx.fillRect(cords[0],cords[1],skok,skok); //tło
+                        ctx.fillStyle = "#494646";
+                        ctx.fillRect(cords[0],cords[1],skok,5); //gąska1
+                        ctx.fillRect(cords[0],cords[1]+25,skok,5); //gąska2
+                        ctx.fillStyle = "#6b6969";
+                        ctx.fillRect(cords[0]+3,cords[1]+5,22,20); //kadłub
+                        ctx.fillStyle = "#d2ced1";
+                        ctx.fillRect(cords[0]+15,cords[1]+13,15,3); //działo
+                        ctx.fillStyle = "#494646";
+                        ctx.fillRect(cords[0]+9,cords[1]+9,12,12); //wieża
+                        gameMode[j][i] = 6;
+                    }
+                }
             }
-            // rysowanie gracza
-            ctx.fillStyle = "grey"; // kolor
-            ctx.fillRect(position.x,position.y,step*2,step*2); // czołg
-            // ssconsole.log(position.x,position.y);
+            //console.log('Mode build',bricks.length);
         }
+
+        function update(){
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // czyszczenie            
+            ctx.fillStyle = "grey";
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+
+            if(rate <= 2000){
+                rate++;
+            }else{
+                rate = 0;
+                for(var i = 0;i < bots.length; i++){
+                moveBOTs(bots[i][0],bots[i][1],bots[2],i)
+                }
+            }
+            //console.log(rate)
+
+            if(rateShoot <= 100){
+               rateShoot++;  
+            }
+            for(var i = 0; i <bots.length;i++){
+
+            drawTank(bots[i][0],bots[i][1],1)               
+            }
+
+            for(var j =0;j < gameMode.length; j++){
+                for(var i =0;i < gameMode[j].length; i++){
+                    if(gameMode[j][i] === 2){
+                          ctx.fillStyle = "blue";
+                         ctx.fillRect(i*skok,j*skok,skok,skok);
+                    } else if(gameMode[j][i] === 3){
+                          ctx.fillStyle = "green";
+                         ctx.fillRect(i*skok,j*skok,skok,skok);
+                    // } 
+                    // else if(gameMode[j][i] === 4){
+                    //       ctx.fillStyle = "brown";
+                    //      ctx.fillRect(i*skok,j*skok,skok,skok);
+                    } else if(gameMode[j][i] === 6){
+                          ctx.fillStyle = "grey";
+                         ctx.fillRect(i*skok,j*skok,skok,skok);
+                    }
+                }
+            }
+
+            for(var i = 0; i < bricks.length;i++){
+                ctx.fillStyle = "red";
+                ctx.fillRect(bricks[i][0],bricks[i][1],skok,skok);
+            }
+            //console.log("długość tabeli:",bricks.length,"zawartość tabeli:",bricks )                         
+            drawTank(cords[0],cords[1],cords[2])
+            for(let i= 0;i < shoots.length;i++ ){
+                ctx.fillStyle = "orange";
+                switch(shoots[i].dir){
+                    case 1:
+                        shoots[i].y += speed;
+                        ctx.fillRect(shoots[i].x,shoots[i].y+20,3,5);
+                    break;
+                    case 2:
+                        shoots[i].x += speed;
+                        ctx.fillRect(shoots[i].x+7,shoots[i].y+13,5,3);
+                    break;
+                    case 3:
+                        shoots[i].y -= speed;
+                        ctx.fillRect(shoots[i].x,shoots[i].y+5,3,5);
+                    break;
+                    case 4:
+                        shoots[i].x -= speed;
+                        ctx.fillRect(shoots[i].x-7,shoots[i].y+13,5,3);
+                    break;
+                }
+               
+                if(checkColision(shoots[i]) === true){
+                    shoots.splice(i,1);
+                }  
+            } 
+            // console.log(bricks);
+            //console.log(cords )
+        }
+
+        function checkColision(shoot){
+            if(shoot.y > canvas.height || shoot.y < 0 || shoot.x < 0 || shoot.x > canvas.width){ 
+                
+                //console.log('Wall ',shoot.x,shoot.y,bricks,score);
+                
+                return true;         
+            }
+                    //shoot.x >= bricks[i][0] && shoot.x < bricks[i][0] + skok &&
+                    //shoot.y >= bricks[i][1] && shoot.y < bricks[i][1] + skok
+            for(var i = 0; i < bricks.length;i++){
+                
+                if(
+                    shoot.x >= bricks[i][0] -3 && shoot.x < bricks[i][0] + skok &&
+                    shoot.y >= bricks[i][1] -15  && shoot.y < bricks[i][1] + skok 
+                    
+                    
+                ){
+                    //console.log(shoot.x,shoot.y,bricks[i],score);
+
+                    bricks.splice(i,1);
+                    score++;
+
+                    
+                    scoreElement.textContent = score;
+
+                    //displayArray.innerHTML = '<pre>' + bricks + "</pre>";
+
+                    if(bricks.length === 0){
+                        console.log('LEVEL FINISHED');
+                    }
+
+                    return true;
+                }
+            }           
+        }
+
         function onKeyDown(event){
-            console.log(event.which, event.code);
+            //console.log(event.code);
             switch(event.code){
 
                 case "KeyA":
-                    let checkerA = false;
-
-                    if( position.x - step < 0){
-                        checkerA = true;
-                    }  
-                        
-                        for(var i=0;i < greenArray.length;i++) {
-                            if(greenArray[i][0] === position.x - step*2){
-                                if(greenArray[i][1] === position.y || greenArray[i][1] === position.y - step || greenArray[i][1] === position.y + step){
+                let checkerA = false;
+                    if(cords[0]> 0){
+                        for(var i = 0;i < bricks.length;i++){
+                            if(bricks[i][0] === cords[0] - skok){
+                                if(bricks[i][1] === cords[1] || bricks[i][1] === cords[1] - ruch || bricks[i][1] === cords[1] + ruch ){
                                     checkerA = true;
                                 }
                             }
-                        } 
-                    
-                    if(checkerA === false) {
-                        position.x -= step;
-                        gameLoop(); 
-                    } 
+                        }
+                    }else{
+                        checkerA = true;
+                    }
+                    for(var i = 0;i < water.length;i++){
+                            if(water[i][0] === cords[0] - skok){
+                                if(water[i][1] === cords[1] || water[i][1] === cords[1] - ruch || water[i][1] === cords[1] + ruch ){
+                                    checkerA = true;
+                                }
+                        }
+                        
+                    }
+
+                    if(checkerA === false){
+                        cords[0] = cords[0] - ruch;
+                    }
+                    cords[2] = 4;
+                    console.log (cords[2]);
                 break;
-                
+
                 case "KeyD":
-                    let checkerD = false;
-
-                    if( position.x + step * 3 > canvas.width){
+                let checkerD = false;
+                    if(cords[0]<dlugoscX - skok){
+                        for(var i = 0;i < bricks.length;i++){
+                            if(bricks[i][0] === cords[0] + skok){
+                                if(bricks[i][1] === cords[1] || bricks[i][1] === cords[1] - ruch || bricks[i][1] === cords[1] + ruch ){
+                                    checkerD = true;
+                                }
+                            }
+                        }
+                        
+                    }else{
                         checkerD = true;
-                    }    
+                    }
 
-                    for(var i=0;i < greenArray.length;i++) {
-                        if(greenArray[i][0] === position.x + step*2){
-                            if(greenArray[i][1] === position.y || greenArray[i][1] === position.y - step || greenArray[i][1] === position.y + step){
+                    for(var i = 0;i < water.length;i++){
+                        if(water[i][0] === cords[0] + skok){
+                            if(water[i][1] === cords[1] || water[i][1] === cords[1] - ruch || water[i][1] === cords[1] + ruch ){
                                 checkerD = true;
                             }
                         }
                     }
-                    if(checkerD === false) {
-                        position.x += step;
-                        gameLoop(); 
-                    }   
+
+                if(checkerD === false){
+                    cords[0] = cords[0] + ruch;
+                }
+                cords[2] = 2;
+                console.log (cords[2]);
+                   
                 break;
-                
+
                 case "KeyW":
                     let checkerW = false;
-
-                    if( position.y - step < 0 ){
-                        checkerW = true;
-                    }    
-                    for(var i=0;i < greenArray.length;i++) {
-                        if(greenArray[i][1] === position.y - step*2){
-                            if(greenArray[i][0] === position.x || greenArray[i][0] === position.x - step || greenArray[i][0] === position.x + step){
-                                checkerW = true;
+                    if(cords[1]> 0){
+                        for(var i = 0;i < bricks.length;i++){
+                            if(bricks[i][1] === cords[1] - skok){
+                                if(bricks[i][0] === cords[0] || bricks[i][0] === cords[0] - ruch || bricks[i][0] === cords[0] + ruch ){
+                                    checkerW = true;
+                                    //console.log("są cegły");
+                                }
                             }
                         }
-                    }                        
-                    if(checkerW === false) {
-                        position.y -= step;
-                        gameLoop(); 
-                    }       
+                        
+                    }else{
+                        checkerW = true;
+                    }
+
+                    for(var i = 0;i < water.length;i++){
+                            if(water[i][1] === cords[1] - skok){
+                                if(water[i][0] === cords[0] || water[i][0] === cords[0] - ruch || water[i][0] === cords[0] + ruch ){
+                                    checkerW = true;
+                                    //console.log("jest woda");
+                                }
+                            }
+                        }
+
+
+                    if(checkerW === false){
+                        cords[1] = cords[1] - ruch;
+                    }
+                    cords[2] = 3;
+                    console.log (cords[2]);
                 break;
 
-                // case "KeyS":
-                //     console.log("w dół");
-                //     if(position.y < canvas.width - step*2){
-                //     position.y+= step;
-                //     gameLoop();
-                //     console.log(position.x,position.y);
-                //     }
-                // break;
-
                 case "KeyS":
-                    let checkerS = false;
-
-                    
-                    if( position.y + step * 3 > canvas.height){
-                        checkerS = true;
-                    }  
-
-                    for(var i=0;i < greenArray.length;i++) {
-                        if(greenArray[i][1] === position.y + step*2){
-                            if(greenArray[i][0] === position.x || greenArray[i][0] === position.x - step || greenArray[i][0] === position.x +step){
-                                checkerS = true;
+                let checkerS = false;
+                    if(cords[1]<dlugoscY- skok){
+                        for(var i = 0;i < bricks.length;i++){
+                            if(bricks[i][1] === cords[1] + skok){
+                                if(bricks[i][0] === cords[0] || bricks[i][0] === cords[0] - ruch || bricks[i][0] === cords[0] + ruch ){
+                                    checkerS = true;
+                                }
                             }
                         }
+                        
+                    }else{
+                        checkerS = true;
                     }
-                    if(checkerS === false) {
-                        position.y += step;
-                        gameLoop(); 
-                    }   
+
+                    for(var i = 0;i < water.length;i++){
+                            if(water[i][1] === cords[1] + skok){
+                                if(water[i][0] === cords[0] || water[i][0] === cords[0] - ruch || water[i][0] === cords[0] + ruch ){
+                                    checkerS = true;
+                                }
+                            }
+                        }
+
+                    if(checkerS === false){
+                        cords[1] = cords[1] + ruch;
+
+                    }
+                    cords[2] = 1;
+                    console.log (cords[2]);
                 break;
 
                 case "Space":
-                    
+                   // console.log('shoot ');
+                    if(rateShoot > 100){
+                        let shiftX,shiftY = 0;
+                        shoots.push({x:cords[0]+13,y:cords[1],dir:cords[2]});
+                        rateShoot = 0;
+                    }                    
                 break;
             }
         }
+        function drawTank(x,y,k,player){
 
+            //TODO
+            //NAPRAWIĆ BOTY
+            var color = "red";
+            if(player === true){
+                color = "#6b6969" ;
+            }
+            switch(k){
+                case 1:
+                    ctx.fillStyle = "#494646";
+                    ctx.fillRect(x,y,5,skok); //gąska1
+                    ctx.fillRect(x+25,y,5,skok); //gąska2
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x+5,y+3,20,22); //kadłub
+                    ctx.fillStyle = "#d2ced1";
+                    ctx.fillRect(x+13,y+15,3,15); //działo
+                    ctx.fillStyle = "#494646";
+                    ctx.fillRect(x+9,y+9,12,12);  //wieża
+               break;
+
+                case 2:
+
+                    ctx.fillStyle = "#494646";
+                    ctx.fillRect(x,y,skok,5); //gąska1
+                    ctx.fillRect(x,y+25,skok,5); //gąska2
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x+3,y+5,22,20); //kadłub
+                    ctx.fillStyle = "#d2ced1";
+                    ctx.fillRect(x+15,y+13,15,3); //działo
+                    ctx.fillStyle = "#494646";
+                    ctx.fillRect(x+9,y+9,12,12); //wieża
+                break;
+
+                case 3:
+
+                    ctx.fillStyle = "#494646";
+                    ctx.fillRect(x,y,5,skok); //gąska1
+                    ctx.fillRect(x+25,y,5,skok); //gąska2
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x+5,y+5,20,22); //kadłub
+                    ctx.fillStyle = "#d2ced1";
+                    ctx.fillRect(x+13,y,3,15); //działo
+                    ctx.fillStyle = "#494646";
+                    ctx.fillRect(x+9,y+9,12,12); //wieża
+                break;
+
+                case 4:
+
+                    ctx.fillStyle = "#494646";
+                    ctx.fillRect(x,y,skok,5); //gąska1
+                    ctx.fillRect(x,y+25,skok,5); //gąska2
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x+5,y+5,22,20); //kadłub
+                    ctx.fillStyle = "#d2ced1";
+                    ctx.fillRect(x,y+13,15,3); //działo
+                    ctx.fillStyle = "#494646";
+                    ctx.fillRect(x+9,y+9,12,12); //wieża
+                break;
+
+        }
+        }
+        function moveBOTs(x,y,k,iteracja){
+            //TODO 
+            var todo = (Math.floor(Math.random() * 5));
+            switch(todo){
+                case 1:
+                
+
+            }
+
+        }
+        function shootsBOTs(){
+            //TODO
+            //JEŚLI GRACZ JEST W TYM SAMYM X LUB Y BOT STRZELA
+
+        }
+
+        function endLevel(){
+            clearInterval(updateInterval); //wywołąnie ekranu końcowego
+            
+            
+            
+
+        }
+        
     </script>
+     <br>
+     <br><b>change log:</b><br>
+    v0.6<br>
+        -dodanie botów<br>
+    v0.5 <br>
+        -zmiana rysowania cegieł<br>
+        -niszczenie cegieł po trafieniu <br>
+    v0.4<br>
+        -strzelanie<br>
+        -kolizja pocisku z granicą mapy<br>
+        -kolizja pocisku z cegłami <br>
+    v0.3<br>
+        -zablokowanie poruszania przez cegły i wode<br>
+    v0.2 <br>
+        -model pojazdu <br>
+        -obracanie modelu względem ruchu <br>
+    v0.1 <br>
+        -mapa<br> 
+        -poruszanie sie<br>
+        -zablokowane granice<br> 
 </body>
 </html>

@@ -18,11 +18,12 @@
     <canvas id="canvas" width="300" height="300"></canvas>
     <button type="button" id="normal" onclick=game(this)>normal mode</button>
     <button type="button" id="test" onclick=game(this)>test mode</button>
-    <div id="displayArray" ><pre>tekst</pre></div>
+    <div id="displayArray" ><!--<pre>tekst</pre></div>-->
     <script>
         document.addEventListener("keydown",onKeyDown,);
         const displayArray = document.querySelector("#displayArray > pre");
         const canvas = document.querySelector("#canvas");
+        const scoreElement = document.querySelector("#score");
         const ctx = canvas.getContext("2d");
         var kierunek = 1;
         var skok = 30;
@@ -46,7 +47,7 @@
         //5 gracz
         //6 start gracza 
         //7
-        const lvl1 = [
+        const test = [
             [1,1,1,3,2,2,3,0,1,1],
             [0,0,0,2,2,3,0,0,1,1],
             [5,0,0,0,3,0,0,0,1,1],
@@ -58,7 +59,7 @@
             [1,1,1,0,1,1,1,0,1,1],
             [1,1,1,0,1,1,1,0,1,1],
         ];//lvl to test
-        const test = [
+        const lvl1 = [
             [1,0,0,0,0,0,0,0,0,0],
             [0,1,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
@@ -76,21 +77,21 @@
         let shoots = [];
         var enemies = [];
         let speed = 1;
-        let rateShoot = 100;
+        let rateShoot = 10;
         var gameMode = test;
         var dlugoscX = gameMode.length * skok;
         var dlugoscY = gameMode.length * skok;
 
         buildMap();
         mainLoop();
+
         function mainLoop(){
             updateInterval = setInterval(reBuildMap, 1);
             //console.log("update Start");
         }
         function game(what){
-            
             if(what.id === "test"){
-                gameMode =test;
+                gameMode = test;
                 buildMap()
             }else if(what.id === "normal"){
                 gameMode = lvl1;
@@ -99,12 +100,11 @@
         }
 
         function buildMap(){
+            
             ctx.fillStyle = "grey";
             ctx.fillRect(0,0,canvas.width,canvas.height);
-
             bricks =[];
             water = [];
-            //console.log(gameMode);
             kierunek = 2;
             for(var j =0;j < gameMode.length; j++){
                 for(var i =0;i < gameMode[j].length; i++){
@@ -113,18 +113,18 @@
                         ctx.fillRect(i*skok,j*skok,skok,skok);
                         bricks.push([i*skok,j*skok]);
                     }else if(gameMode[j][i] === 2){
-                          ctx.fillStyle = "blue";
-                         ctx.fillRect(i*skok,j*skok,skok,skok);
-                         water.push([i*skok,j*skok]);
+                        ctx.fillStyle = "blue";
+                        ctx.fillRect(i*skok,j*skok,skok,skok);
+                        water.push([i*skok,j*skok]);
                     }else if(gameMode[j][i] === 3){
-                          ctx.fillStyle = "green";
-                         ctx.fillRect(i*skok,j*skok,skok,skok);
+                        ctx.fillStyle = "green";
+                        ctx.fillRect(i*skok,j*skok,skok,skok);
                     }else if(gameMode[j][i] === 4){
-                          ctx.fillStyle = "brown";
-                         ctx.fillRect(i*skok,j*skok,skok,skok);
+                        ctx.fillStyle = "brown";
+                        ctx.fillRect(i*skok,j*skok,skok,skok);
                     }else if(gameMode[j][i] === 0){
-                          ctx.fillStyle = "grey";
-                         ctx.fillRect(i*skok,j*skok,skok,skok);
+                        ctx.fillStyle = "grey";
+                        ctx.fillRect(i*skok,j*skok,skok,skok);
                     }else if(gameMode[j][i] === 5){
                         cords.push(i*skok,j*skok);
                         ctx.fillStyle = "grey";
@@ -142,112 +142,96 @@
                     }
                 }
             }
+            //console.log('Mode build',bricks.length);
         }
+
         function reBuildMap(){
             ctx.clearRect(0, 0, canvas.width, canvas.height); // czyszczenie            
             ctx.fillStyle = "grey";
             ctx.fillRect(0,0,canvas.width,canvas.height);
-            //console.log(cords[0],cords[1]);
-            if(rateShoot <100){
-                rateShoot++;
 
+            if(rateShoot <= 100){
+               rateShoot++;  
             }
-
 
             for(var j =0;j < gameMode.length; j++){
                 for(var i =0;i < gameMode[j].length; i++){
-                    // if(gameMode[j][i] === 1){
-                    //     ctx.fillStyle = "red";
-                    //     ctx.fillRect(i*skok,j*skok,skok,skok);
-                    // }else 
                     if(gameMode[j][i] === 2){
                           ctx.fillStyle = "blue";
                          ctx.fillRect(i*skok,j*skok,skok,skok);
-                    }else if(gameMode[j][i] === 3){
+                    } else if(gameMode[j][i] === 3){
                           ctx.fillStyle = "green";
                          ctx.fillRect(i*skok,j*skok,skok,skok);
-                    }else if(gameMode[j][i] === 4){
+                    } else if(gameMode[j][i] === 4){
                           ctx.fillStyle = "brown";
                          ctx.fillRect(i*skok,j*skok,skok,skok);
-                    }else if(gameMode[j][i] === 6){
+                    } else if(gameMode[j][i] === 6){
                           ctx.fillStyle = "grey";
                          ctx.fillRect(i*skok,j*skok,skok,skok);
                     }
-                    
                 }
-
             }
-            // else if(gameMode[j][i] === 0){
-            //               ctx.fillStyle = "grey";
-            //              ctx.fillRect(i*skok,j*skok,skok,skok);
-            //         }
-                for(var i = 0; i <bricks.length;i++){
+
+            for(var i = 0; i < bricks.length;i++){
                 ctx.fillStyle = "red";
                 ctx.fillRect(bricks[i][0],bricks[i][1],skok,skok);
-                }
-            
-            // for(var k =0;k ===bricks.length;i++){
-            //             ctx.fillStyle = "red";
-            //             ctx.fillRect(bricks[k][0],bricks[k][1],skok,skok);
-                       
-            //             }
-                        
-                    
+            }
+            //console.log("długość tabeli:",bricks.length,"zawartość tabeli:",bricks )                         
             switch(kierunek){
                 case 1:
-                        //ctx.fillStyle = "grey";
-                        //ctx.fillRect(cords[0],cords[1],skok,skok); //tło
-                        ctx.fillStyle = "#494646";
-                        ctx.fillRect(cords[0],cords[1],5,skok); //gąska1
-                        ctx.fillRect(cords[0]+25,cords[1],5,skok); //gąska2
-                        ctx.fillStyle = "#6b6969";
-                        ctx.fillRect(cords[0]+5,cords[1]+3,20,22); //kadłub
-                        ctx.fillStyle = "#d2ced1";
-                        ctx.fillRect(cords[0]+13,cords[1]+15,3,15); //działo
-                        ctx.fillStyle = "#494646";
-                        ctx.fillRect(cords[0]+9,cords[1]+9,12,12);  //wieża
+                    //ctx.fillStyle = "grey";
+                    //ctx.fillRect(cords[0],cords[1],skok,skok); //tło
+                    ctx.fillStyle = "#494646";
+                    ctx.fillRect(cords[0],cords[1],5,skok); //gąska1
+                    ctx.fillRect(cords[0]+25,cords[1],5,skok); //gąska2
+                    ctx.fillStyle = "#6b6969";
+                    ctx.fillRect(cords[0]+5,cords[1]+3,20,22); //kadłub
+                    ctx.fillStyle = "#d2ced1";
+                    ctx.fillRect(cords[0]+13,cords[1]+15,3,15); //działo
+                    ctx.fillStyle = "#494646";
+                    ctx.fillRect(cords[0]+9,cords[1]+9,12,12);  //wieża
                break;
 
                 case 2:
-                        //ctx.fillStyle = "grey";
-                        //ctx.fillRect(cords[0],cords[1],skok,skok); //tło
-                        ctx.fillStyle = "#494646";
-                        ctx.fillRect(cords[0],cords[1],skok,5); //gąska1
-                        ctx.fillRect(cords[0],cords[1]+25,skok,5); //gąska2
-                        ctx.fillStyle = "#6b6969";
-                        ctx.fillRect(cords[0]+3,cords[1]+5,22,20); //kadłub
-                        ctx.fillStyle = "#d2ced1";
-                        ctx.fillRect(cords[0]+15,cords[1]+13,15,3); //działo
-                        ctx.fillStyle = "#494646";
-                        ctx.fillRect(cords[0]+9,cords[1]+9,12,12); //wieża
+                    //ctx.fillStyle = "grey";
+                    //ctx.fillRect(cords[0],cords[1],skok,skok); //tło
+                    ctx.fillStyle = "#494646";
+                    ctx.fillRect(cords[0],cords[1],skok,5); //gąska1
+                    ctx.fillRect(cords[0],cords[1]+25,skok,5); //gąska2
+                    ctx.fillStyle = "#6b6969";
+                    ctx.fillRect(cords[0]+3,cords[1]+5,22,20); //kadłub
+                    ctx.fillStyle = "#d2ced1";
+                    ctx.fillRect(cords[0]+15,cords[1]+13,15,3); //działo
+                    ctx.fillStyle = "#494646";
+                    ctx.fillRect(cords[0]+9,cords[1]+9,12,12); //wieża
                 break;
 
                 case 3:
-                        //ctx.fillStyle = "grey";
-                        //ctx.fillRect(cords[0],cords[1],skok,skok); //tło
-                        ctx.fillStyle = "#494646";
-                        ctx.fillRect(cords[0],cords[1],5,skok); //gąska1
-                        ctx.fillRect(cords[0]+25,cords[1],5,skok); //gąska2
-                        ctx.fillStyle = "#6b6969";
-                        ctx.fillRect(cords[0]+5,cords[1]+5,20,22); //kadłub
-                        ctx.fillStyle = "#d2ced1";
-                        ctx.fillRect(cords[0]+13,cords[1],3,15); //działo
-                        ctx.fillStyle = "#494646";
-                        ctx.fillRect(cords[0]+9,cords[1]+9,12,12); //wieża
+                    //ctx.fillStyle = "grey";
+                    //ctx.fillRect(cords[0],cords[1],skok,skok); //tło
+                    ctx.fillStyle = "#494646";
+                    ctx.fillRect(cords[0],cords[1],5,skok); //gąska1
+                    ctx.fillRect(cords[0]+25,cords[1],5,skok); //gąska2
+                    ctx.fillStyle = "#6b6969";
+                    ctx.fillRect(cords[0]+5,cords[1]+5,20,22); //kadłub
+                    ctx.fillStyle = "#d2ced1";
+                    ctx.fillRect(cords[0]+13,cords[1],3,15); //działo
+                    ctx.fillStyle = "#494646";
+                    ctx.fillRect(cords[0]+9,cords[1]+9,12,12); //wieża
                 break;
 
                 case 4:
-                        //ctx.fillStyle = "grey";
-                        //ctx.fillRect(cords[0],cords[1],skok,skok); //tło
-                        ctx.fillStyle = "#494646";
-                        ctx.fillRect(cords[0],cords[1],skok,5); //gąska1
-                        ctx.fillRect(cords[0],cords[1]+25,skok,5); //gąska2
-                        ctx.fillStyle = "#6b6969";
-                        ctx.fillRect(cords[0]+5,cords[1]+5,22,20); //kadłub
-                        ctx.fillStyle = "#d2ced1";
-                        ctx.fillRect(cords[0],cords[1]+13,15,3); //działo
-                        ctx.fillStyle = "#494646";
-                        ctx.fillRect(cords[0]+9,cords[1]+9,12,12); //wieża
+                    //ctx.fillStyle = "grey";
+                    //ctx.fillRect(cords[0],cords[1],skok,skok); //tło
+                    ctx.fillStyle = "#494646";
+                    ctx.fillRect(cords[0],cords[1],skok,5); //gąska1
+                    ctx.fillRect(cords[0],cords[1]+25,skok,5); //gąska2
+                    ctx.fillStyle = "#6b6969";
+                    ctx.fillRect(cords[0]+5,cords[1]+5,22,20); //kadłub
+                    ctx.fillStyle = "#d2ced1";
+                    ctx.fillRect(cords[0],cords[1]+13,15,3); //działo
+                    ctx.fillStyle = "#494646";
+                    ctx.fillRect(cords[0]+9,cords[1]+9,12,12); //wieża
                 break;
 
             }
@@ -270,74 +254,50 @@
                         shoots[i].x -= speed;
                         ctx.fillRect(shoots[i].x-7,shoots[i].y+13,5,3);
                     break;
-
                 }
                
-
                 if(checkColision(shoots[i]) === true){
                     shoots.splice(i,1);
                 }  
             } 
-            console.log(gameMode,skok);
-            displayArray.textContent = bricks;
-        
+            // console.log(bricks);
+            
         }
-        function checkColision(shoot){ 
-            if(shoot.y > canvas.height || shoot.y < 0 || shoot.x < 0 || shoot.x > canvas.width){   
+
+        function checkColision(shoot){
+            if(shoot.y > canvas.height || shoot.y < 0 || shoot.x < 0 || shoot.x > canvas.width){ 
+                
+                //console.log('Wall ',shoot.x,shoot.y,bricks,score);
+                
                 return true;         
             }
-            switch(shoot.dir){
-                case 1:
-                    for(var i = 0; i <bricks.length;i++){
-                        if(shoot.y+25 === bricks[i][1]){
-                            if(shoot.x-13 ===bricks[i][0] ||shoot.x+2 === bricks[i][0] ||shoot.x-28 ===bricks[i][0]){
-                                bricks.splice(i,1);
-                                gameMode[bricks[i][1]/skok][bricks[i][0]/skok] = 0;
-                                console.log("robie 1");
-                                score++;
-                                return true;
-                            }
-                        }
-                    }//working v2
-                break;
-                case 2:
-                for(var i = 0; i <bricks.length;i++){
-                        if(shoot.x+12 === bricks[i][1]){                            
-                            if(shoot.y ===bricks[i][0] ||shoot.y+15 === bricks[i][0] ||shoot.y-15 ===bricks[i][0]){
-                                bricks.splice(i,1);
-                                score++;
-                                console.log(bricks[i][0],bricks[i][1])
-                                return true;
-                            }
-                        }
-                    }//!working v2
-                break;
-                case 3:
-                    for(var i = 0; i <bricks.length;i++){
-                        if(shoot.y-25 === bricks[i][1]){
-                            if(shoot.x-13 ===bricks[i][0] ||shoot.x+2 === bricks[i][0] ||shoot.x-28 ===bricks[i][0]){
-                                bricks.splice(i,1);
-                                score++;
-                                return true;
-                            }
-                        }
-                    }//working v2
-                break;
-                case 4:
-                for(var i = 0; i <bricks.length;i++){
+                    //shoot.x >= bricks[i][0] && shoot.x < bricks[i][0] + skok &&
+                    //shoot.y >= bricks[i][1] && shoot.y < bricks[i][1] + skok
+            for(var i = 0; i < bricks.length;i++){
+                
+                if(
+                    shoot.x >= bricks[i][0] -3 && shoot.x < bricks[i][0] + skok &&
+                    shoot.y >= bricks[i][1] -15  && shoot.y < bricks[i][1] + skok 
                     
-                        if(shoot.x-37 === bricks[i][1]){
-                            if(shoot.y ===bricks[i][0] ||shoot.y+15 === bricks[i][0] ||shoot.y-15 ===bricks[i][0]){
-                                bricks.splice(i,1);
-                                score++;
-                                console.log(bricks[i][0],bricks[i][1])
-                                return true;
-                            }
-                        }
-                    }//!working v2
-                break;
-            }
-            
+                    
+                ){
+                    //console.log(shoot.x,shoot.y,bricks[i],score);
+
+                    bricks.splice(i,1);
+                    score++;
+
+                    
+                    scoreElement.textContent = score;
+
+                    //displayArray.innerHTML = '<pre>' + bricks + "</pre>";
+
+                    if(bricks.length === 0){
+                        console.log('LEVEL FINISHED');
+                    }
+
+                    return true;
+                }
+            }           
         }
 
         function onKeyDown(event){
@@ -354,7 +314,6 @@
                                 }
                             }
                         }
-                        
                     }else{
                         checkerA = true;
                     }
@@ -468,22 +427,17 @@
                 break;
 
                 case "Space":
-                    if(rateShoot === 100){
-
+                   // console.log('shoot ');
+                    if(rateShoot > 100){
                         let shiftX,shiftY = 0;
                         shoots.push({x:cords[0]+13,y:cords[1],dir:kierunek});
                         rateShoot = 0;
-                    }
-                     
-                break;
-
-                case "KeyF":
-                    endGame()
+                    }                    
                 break;
             }
         }
 
-        function endGame(){
+        function endLevel(){
             clearInterval(updateInterval); //wywołąnie ekranu końcowego
             // todo 6 na 5
             //zmienić rysowanie mapy 
@@ -492,7 +446,7 @@
         }
         
     </script>
-    <!-- <br>
+     <br>
     v0.5 <br>
         -zmiana rysowania cegieł<br>
         -niszczenie cegieł po trafieniu <br>
@@ -508,6 +462,6 @@
     v0.1 <br>
         -mapa<br> 
         -poruszanie sie<br>
-        -zablokowane granice<br> -->
+        -zablokowane granice<br> 
 </body>
 </html>

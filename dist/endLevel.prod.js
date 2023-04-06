@@ -1,0 +1,1 @@
+"use strict";function endLevel(){clearInterval(updateInterval);var e=prompt("Your score is "+score+"!!! Enter your name:");null!==e&&console.log("wyślij",e),sendScore(gameName,e,score)}

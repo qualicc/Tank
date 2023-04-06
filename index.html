@@ -19,8 +19,18 @@
     <button type="button" id="normal" onclick=game(this)>normal mode</button>
     <button type="button" id="test" onclick=game(this)>test mode</button>
     <div id="displayArray" ><!--<pre>tekst</pre></div>-->
+    <script type="text/javascript" src="onKeyDown.js"></script>
+    <script type="text/javascript" src="colisionTanks.js"></script>
+    <script type="text/javascript" src="randomNumber.js"></script>
+    <script type="text/javascript" src="moveBots.js"></script>
+    <script type="text/javascript" src="shootsBots.js"></script>
+    <script type="text/javascript" src="drawTank.js"></script>
+    <script type="text/javascript" src="chceckColision.js"></script>
+    <script type="text/javascript" src="mainLoop.js"></script>
+    <script type="text/javascript" src="game.js"></script>
+    <script type="text/javascript" src="endLevel.js"></script>
     <script>
-        document.addEventListener("keydown",onKeyDown,);
+        
         const displayArray = document.querySelector("#displayArray > pre");
         const canvas = document.querySelector("#canvas");
         const scoreElement = document.querySelector("#score");
@@ -51,13 +61,13 @@
             [1,1,1,3,2,2,3,0,1,1],
             [0,0,0,2,2,3,0,0,1,1],
             [5,0,0,0,3,0,0,0,1,1],
-            [3,2,0,0,0,0,0,0,0,0],
+            [3,2,0,0,0,0,0,0,0,4],
             [2,2,3,0,1,1,1,0,1,1],
             [2,3,0,0,1,1,1,0,1,1],
             [3,0,0,0,1,1,1,0,1,1],
-            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,4],
             [1,1,1,0,1,1,1,0,1,1],
-            [1,1,1,0,1,1,1,0,1,1],
+            [1,1,1,0,1,1,1,4,1,1],
         ];//lvl to test
         const test = [
             [1,0,0,0,0,0,0,0,0,0],
@@ -65,11 +75,11 @@
             [0,0,0,0,0,0,0,0,0,0],
             [5,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,1,0,0,0],
-            [0,0,0,0,0,1,1,0,0,0],
+            [0,0,0,0,4,1,1,0,0,0],
             [0,0,0,0,1,1,1,0,0,0],
             [0,0,0,0,0,0,0,0,1,0],
             [0,0,0,0,0,0,0,1,1,0],
-            [0,0,0,0,0,4,1,1,1,0],
+            [0,0,0,0,0,0,1,1,1,0],
         ];
         var count = 0;
         var startShot = 0;
@@ -78,27 +88,15 @@
         var enemies = [];
         let speed = 1;
         let rateShoot = 10;
-        var gameMode = test;
+        var gameMode = lvl1;
         var dlugoscX = gameMode.length * skok;
         var dlugoscY = gameMode.length * skok;
         var bots = [];
         var rate = 0;
+        let gameName = 'tanks';
         start();
         mainLoop();
 
-        function mainLoop(){
-            updateInterval = setInterval(update, 1);
-            //console.log("update Start");
-        }
-        function game(what){
-            if(what.id === "test"){
-                gameMode = test;
-                start()
-            }else if(what.id === "normal"){
-                gameMode = lvl1;
-                start()
-            }
-        }
 
         function start(){
             
@@ -113,6 +111,7 @@
                         ctx.fillStyle = "red";
                         ctx.fillRect(i*skok,j*skok,skok,skok);
                         bricks.push([i*skok,j*skok]);
+                        //drawBrick(i,j)
                     }else if(gameMode[j][i] === 2){
                         ctx.fillStyle = "blue";
                         ctx.fillRect(i*skok,j*skok,skok,skok);
@@ -154,23 +153,15 @@
             ctx.fillStyle = "grey";
             ctx.fillRect(0,0,canvas.width,canvas.height);
             //ruszanie botów
-            if(rate <= 2000){
-                rate++;
-            }else{
-                rate = 0;
-                for(var i = 0;i < bots.length; i++){
-                moveBots(bots[i][0],bots[i][1],bots[2],i,false)
-                }
-            }
-            console.log(rate)
+            
+            //console.log(rate)
             //ograniczenie strzałów
             if(rateShoot <= 100){
                rateShoot++;  
             }
             //rysowanie czołgów
             for(var i = 0; i <bots.length;i++){
-
-            drawTank(bots[i][0],bots[i][1],1,bots[3])               
+            drawTank(bots[i][0],bots[i][1],bots[i][2],bots[3])               
             }
 
             for(var j =0;j < gameMode.length; j++){
@@ -191,7 +182,25 @@
                     }
                 }
             }
+            if(rate <= 200){
+                            rate++;
+                        }else{
+                            rate = 0;
+                            for(var i = 0;i < bots.length; i++){
+                                //console.log("-------",moveBots(bots[i][0],bots[i][1],bots[2],i))
+                                //moveBots(bots[i][0],bots[i][1],bots[2],i)
+                            
+                                let botPos = moveBots(bots[i][0],bots[i][1],bots[i][2],i);
+                                //console.log(botPos)
+                                if(botPos){
 
+                                    
+                                    bots[i] = []
+                                    bots[i] = botPos;
+                                    //console.log(bots)
+                                }
+                            }
+                        }
             for(var i = 0; i < bricks.length;i++){
                 ctx.fillStyle = "red";
                 ctx.fillRect(bricks[i][0],bricks[i][1],skok,skok);
@@ -221,347 +230,55 @@
                
                 if(checkColision(shoots[i]) === true){
                     shoots.splice(i,1);
-                }  
+                }
+                if(checkColision(shoots[i]) === true){
+                    bots.splice(i);
+                }
             } 
             // console.log(bricks);
             //console.log(cords )
         }
+        function sendScore(game,person,score){
+            let xhr = new XMLHttpRequest();
 
-        function checkColision(shoot){
-            if(shoot.y > canvas.height || shoot.y < 0 || shoot.x < 0 || shoot.x > canvas.width){ 
-                
-                //console.log('Wall ',shoot.x,shoot.y,bricks,score);
-                
-                return true;         
+            let params = "game=" + game + "&name=" + person + "&score=" + score;
+
+            xhr.open('POST', 'addscore.php', true);
+            xhr.setRequestHeader('Content-type','application/x-www-form-urlencoded');
+
+            xhr.onload = function(){
+                fetchScore();
             }
-                    //shoot.x >= bricks[i][0] && shoot.x < bricks[i][0] + skok &&
-                    //shoot.y >= bricks[i][1] && shoot.y < bricks[i][1] + skok
-            for(var i = 0; i < bricks.length;i++){
-                
-                if(
-                    shoot.x >= bricks[i][0] -3 && shoot.x < bricks[i][0] + skok &&
-                    shoot.y >= bricks[i][1] -15  && shoot.y < bricks[i][1] + skok 
-                    
-                    
-                ){
-                    //console.log(shoot.x,shoot.y,bricks[i],score);
 
-                    bricks.splice(i,1);
-                    score++;
+            xhr.send(params);
+        }
+        function fetchScore(){
+            let xhr = new XMLHttpRequest();
 
-                    
-                    scoreElement.textContent = score;
+            xhr.open('GET', 'fetchscore.php', true);
 
-                    //displayArray.innerHTML = '<pre>' + bricks + "</pre>";
+            xhr.onload = function(){
+                console.log(this.responseText);
 
-                    if(bricks.length === 0){
-                        console.log('LEVEL FINISHED');
-                    }
+                scoreData = JSON.parse(this.responseText);
 
-                    return true;
+                var output = '<ol>';
+
+                for (var i in scoreData){
+                    output += '<li><span class="name">' + scoreData[i].name + '</span><span>score: ' + scoreData[i].score + ' clicks</span></li>';
                 }
-            }           
-        }
 
-        function onKeyDown(event){
-            //console.log(event.code);
-            switch(event.code){
+                output += '</ol>';
 
-                case "KeyA":
-                let checkerA = false;
-                    if(cords[0]> 0){
-                        for(var i = 0;i < bricks.length;i++){
-                            if(bricks[i][0] === cords[0] - skok){
-                                if(bricks[i][1] === cords[1] || bricks[i][1] === cords[1] - ruch || bricks[i][1] === cords[1] + ruch ){
-                                    checkerA = true;
-                                }
-                            }
-                        }
-                    }else{
-                        checkerA = true;
-                    }
-                    for(var i = 0;i < water.length;i++){
-                            if(water[i][0] === cords[0] - skok){
-                                if(water[i][1] === cords[1] || water[i][1] === cords[1] - ruch || water[i][1] === cords[1] + ruch ){
-                                    checkerA = true;
-                                }
-                        }
-                        
-                    }
-
-                    if(checkerA === false){
-                        cords[0] = cords[0] - ruch;
-                    }
-                    cords[2] = 4;
-                    console.log (cords[2]);
-                break;
-
-                case "KeyD":
-                let checkerD = false;
-                    if(cords[0]<dlugoscX - skok){
-                        for(var i = 0;i < bricks.length;i++){
-                            if(bricks[i][0] === cords[0] + skok){
-                                if(bricks[i][1] === cords[1] || bricks[i][1] === cords[1] - ruch || bricks[i][1] === cords[1] + ruch ){
-                                    checkerD = true;
-                                }
-                            }
-                        }
-                        
-                    }else{
-                        checkerD = true;
-                    }
-
-                    for(var i = 0;i < water.length;i++){
-                        if(water[i][0] === cords[0] + skok){
-                            if(water[i][1] === cords[1] || water[i][1] === cords[1] - ruch || water[i][1] === cords[1] + ruch ){
-                                checkerD = true;
-                            }
-                        }
-                    }
-
-                if(checkerD === false){
-                    cords[0] = cords[0] + ruch;
-                }
-                cords[2] = 2;
-                console.log (cords[2]);
-                   
-                break;
-
-                case "KeyW":
-                    let checkerW = false;
-                    if(cords[1]> 0){
-                        for(var i = 0;i < bricks.length;i++){
-                            if(bricks[i][1] === cords[1] - skok){
-                                if(bricks[i][0] === cords[0] || bricks[i][0] === cords[0] - ruch || bricks[i][0] === cords[0] + ruch ){
-                                    checkerW = true;
-                                    //console.log("są cegły");
-                                }
-                            }
-                        }
-                        
-                    }else{
-                        checkerW = true;
-                    }
-
-                    for(var i = 0;i < water.length;i++){
-                            if(water[i][1] === cords[1] - skok){
-                                if(water[i][0] === cords[0] || water[i][0] === cords[0] - ruch || water[i][0] === cords[0] + ruch ){
-                                    checkerW = true;
-                                    //console.log("jest woda");
-                                }
-                            }
-                        }
-
-
-                    if(checkerW === false){
-                        cords[1] = cords[1] - ruch;
-                    }
-                    cords[2] = 3;
-                    console.log (cords[2]);
-                break;
-
-                case "KeyS":
-                colisionTanks(cords[0],cords[1],event.code)
-                let checkerS = false;
-                    if(cords[1]<dlugoscY- skok){
-                        for(var i = 0;i < bricks.length;i++){
-                            if(bricks[i][1] === cords[1] + skok){
-                                if(bricks[i][0] === cords[0] || bricks[i][0] === cords[0] - ruch || bricks[i][0] === cords[0] + ruch ){
-                                    checkerS = true;
-                                }
-                            }
-                        }
-                        
-                    }else{
-                        checkerS = true;
-                    }
-
-                    for(var i = 0;i < water.length;i++){
-                            if(water[i][1] === cords[1] + skok){
-                                if(water[i][0] === cords[0] || water[i][0] === cords[0] - ruch || water[i][0] === cords[0] + ruch ){
-                                    checkerS = true;
-                                }
-                            }
-                        }
-
-                    if(checkerS === false){
-                        cords[1] = cords[1] + ruch;
-
-                    }
-                    cords[2] = 1;
-                    console.log (cords[2]);
-                break;
-
-                case "Space":
-                   // console.log('shoot ');
-                    if(rateShoot > 100){
-                        let shiftX,shiftY = 0;
-                        shoots.push({x:cords[0]+13,y:cords[1],dir:cords[2]});
-                        rateShoot = 0;
-                    }                    
-                break;
-                case "KeyF":
-                    endLevel()
+                document.querySelector('#highScore').innerHTML = output;
             }
+
+            xhr.send();
         }
-        function colisionTanks(x,y,k){
-            //if(k)
-            // switch(k){
-            //     case 1:
-
-
-            // }
-            
-        }
-
-        function drawTank(x,y,k,player){
-            //console.log(cords)
-            
-            //TODO
-            //NAPRAWIĆ kolor
-            var color = "red";
-            //console.log(bots)
-            if(player === true){
-                color = "#6b6969" ;
-            }
-            switch(k){
-                case 1:
-                    ctx.fillStyle = "#494646";
-                    ctx.fillRect(x,y,5,skok); //gąska1
-                    ctx.fillRect(x+25,y,5,skok); //gąska2
-                    ctx.fillStyle = color;
-                    ctx.fillRect(x+5,y+3,20,22); //kadłub
-                    ctx.fillStyle = "#d2ced1";
-                    ctx.fillRect(x+13,y+15,3,15); //działo
-                    ctx.fillStyle = "#494646";
-                    ctx.fillRect(x+9,y+9,12,12);  //wieża
-               break;
-
-                case 2:
-
-                    ctx.fillStyle = "#494646";
-                    ctx.fillRect(x,y,skok,5); //gąska1
-                    ctx.fillRect(x,y+25,skok,5); //gąska2
-                    ctx.fillStyle = color;
-                    ctx.fillRect(x+3,y+5,22,20); //kadłub
-                    ctx.fillStyle = "#d2ced1";
-                    ctx.fillRect(x+15,y+13,15,3); //działo
-                    ctx.fillStyle = "#494646";
-                    ctx.fillRect(x+9,y+9,12,12); //wieża
-                break;
-
-                case 3:
-
-                    ctx.fillStyle = "#494646";
-                    ctx.fillRect(x,y,5,skok); //gąska1
-                    ctx.fillRect(x+25,y,5,skok); //gąska2
-                    ctx.fillStyle = color;
-                    ctx.fillRect(x+5,y+5,20,22); //kadłub
-                    ctx.fillStyle = "#d2ced1";
-                    ctx.fillRect(x+13,y,3,15); //działo
-                    ctx.fillStyle = "#494646";
-                    ctx.fillRect(x+9,y+9,12,12); //wieża
-                break;
-
-                case 4:
-
-                    ctx.fillStyle = "#494646";
-                    ctx.fillRect(x,y,skok,5); //gąska1
-                    ctx.fillRect(x,y+25,skok,5); //gąska2
-                    ctx.fillStyle = color;
-                    ctx.fillRect(x+5,y+5,22,20); //kadłub
-                    ctx.fillStyle = "#d2ced1";
-                    ctx.fillRect(x,y+13,15,3); //działo
-                    ctx.fillStyle = "#494646";
-                    ctx.fillRect(x+9,y+9,12,12); //wieża
-                break;
-
-        }
-        }
-        function randomNumber(number){
-            var number = (Math.floor(Math.random() * 5));
-            
-            return number
-        }
-        function moveBots(x,y,k,iteracja){
-            //TODO 
-            
-            var nextMove = randomNumber(nextMove)
-            console.log("to jest numer:",nextMove)
-            try{
-                switch(nextMove){
-                    case 0:
-                    moveBots(x,y,k,iteracja)
-                    break;
-                    case 1:
-                    y += skok;
-                    k = 1;
-                    console.log(x,y,k)
-                    return y,k
-                    break;
-                    case 2:
-                    x += skok;
-                    k = 2;
-                    console.log(x,y,k)
-                    return x,k
-                    break;
-                    case 3:
-                    y -= skok;
-                    k = 3;
-                    console.log(x,y,k)
-                    return y,k
-                    break;
-                    case 4:
-                    y -= skok;
-                    k = 4;
-                    onsole.log(x,y,k)
-                    return y,k
-                    break;
-                }
-            }
-            catch(err){
-                console.log("error")
-            }
-            console.log("ruszam")
-            //console.log(x,y,k)
-        }
-        function shootsBots(xBot,yBot,xPlayer,yPlayer,k){
-            //TODO
-            //JEŚLI GRACZ JEST W TYM SAMYM X LUB Y BOT STRZELA
-            if (xBot === xPlayer){
-                if(yBot < yPlayer){
-                    shoots.push({x:xBot,y:yBot,dir:1});
-                    k = 1;
-                }else{
-                    shoots.push({x:xBot,y:yBot,dir:3});
-                    k = 3;
-                }
-            }else if(yBot === yPlayer){
-                if(xBot < xPlayer){
-                    shoots.push({x:xBot,y:yBot,dir:2});
-                    k = 2;
-                }else{
-                    shoots.push({x:xBot,y:yBot,dir:4});
-                    k = 4;
-                }
-            }
-        }
-
-        function endLevel(){
-            clearInterval(updateInterval); //wywołąnie ekranu końcowego
-            
-            
-            
-
-        }
-        
     </script>
      <br>
      <br><b>#TODO</b><br>
-     -naprawić swicha w 492
-     -podłączyć strzały
-     -wyodrębnić kolizje podczas ruchu
-     -podpią kolizje ruchu do botów
+     -podłączyć strzały<br>
      <br><b>change log:</b><br>
     v0.6<br>
         -dodanie botów<br>

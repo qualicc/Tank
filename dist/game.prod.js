@@ -1,0 +1,1 @@
+"use strict";function game(t){"test"===t.id?(gameMode=lvl1,start()):"normal"===t.id&&(gameMode=test,start())}

@@ -8,7 +8,8 @@
 </head>
 <body>
     <canvas id="canvas" width="300" height="300"></canvas>
-    <script src="jquery-3.6.3.min.js"></script>
+    <button onclick="clearInterval(updateInterval)">stop interval</button>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

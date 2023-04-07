@@ -9,10 +9,14 @@ const rozmiarPola = 30;
 const stepWait = 1;
 
 class Player {
-    x = 0;
-    y = 0;  
+    x;
+    y;  
     kierunek = 1;
     actualStep = 0;
+    constructor(posx, posy){
+        this.x = posx;
+        this.y = posy;
+    }
     setX(posx){
         this.x = posx;
     }
@@ -63,7 +67,7 @@ class Player {
                 ctx.fillStyle = "#d2ced1";
                 ctx.fillRect(this.x+13,this.y+15,3,15); //działo
                 ctx.fillStyle = "#494646";
-                ctx.fillRect(this.x+9,this.day+9,12,12);  //wieża
+                ctx.fillRect(this.x+9,this.y+9,12,12);  //wieża
            break;
     
             case 2:
@@ -103,6 +107,14 @@ class Player {
             break;
     
         }
+    }
+}
+class Bullet{
+    x;
+    y;
+    constructor(posx, posy){
+        x = posx;
+        y = posy;
     }
 }
 class Bot{
@@ -148,7 +160,7 @@ class Bot{
                 ctx.fillStyle = "#d2ced1";
                 ctx.fillRect(this.x+13,this.y+15,3,15); //działo
                 ctx.fillStyle = "#494646";
-                ctx.fillRect(this.x+9,this.day+9,12,12);  //wieża
+                ctx.fillRect(this.x+9,this.y+9,12,12);  //wieża
            break;
     
             case 2:
@@ -192,7 +204,7 @@ class Bot{
 }
 class Game {
     map;
-    player = new Player();
+    player;
     bots = [];
     constructor(lvl) {
         this.map = this.loadMap(lvl);
@@ -236,17 +248,13 @@ class Game {
                     case 4:
                         this.bots.push(new Bot(i*rozmiarPola,j*rozmiarPola))
                         ctx.fillStyle = "grey";//boty
-                        ctx.fillRect(i*rozmiarPola,j*rozmiarPola,rozmiarPola,rozmiarPola);
-                        break;
-                    case 0:
-                        ctx.fillStyle = "grey";
+                        this.map[j][i] = 6;
                         ctx.fillRect(i*rozmiarPola,j*rozmiarPola,rozmiarPola,rozmiarPola);
                         break;
                     case 5:
                         ctx.fillStyle = "grey";
                         ctx.fillRect(i*rozmiarPola,j*rozmiarPola,rozmiarPola,rozmiarPola);
-                        this.player.setX(i*rozmiarPola);
-                        this.player.setY(j*rozmiarPola);
+                        this.player = new Player(i*rozmiarPola,j*rozmiarPola);
                         this.player.playerDraw();
                         this.map[j][i] = 6;
                         break;
@@ -255,26 +263,23 @@ class Game {
         }
     }
     update(){
-        this.clear()
-        this.draw()
-        this.player.playerDraw()
+        this.clear();
+        this.draw();
+        this.bots.forEach(element => element.playerDraw());
+        this.player.playerDraw();
     }
     move(kierunek) {
           switch(kierunek) {
             case 1: // lewa strzałka
-              console.log(this.player.x + " " + this.player.y)
               this.player.moveLeft();
               break;
             case 2: // górna strzałka
-              console.log(this.player.x + " " + this.player.y)
               this.player.moveUp();
               break;
             case 3: // prawa strzałka
-              console.log(this.player.x + " " + this.player.y)
               this.player.moveRight();
               break;
             case 4: // dolna strzałka
-              console.log(this.player.x + " " + this.player.y)
               this.player.moveDown();
               break;
         }      
@@ -289,16 +294,20 @@ let updateInterval = setInterval(one.update.bind(one), 10);
 function onKeyDown(event){
     switch (event.code) {
         case "KeyA":
-            one.move(1)
+            one.move(1);
             break;
         case "KeyW":
-            one.move(2)
+            one.move(2);
             break;
         case "KeyD":
-            one.move(3)
+            one.move(3);
             break;
         case "KeyS":
-            one.move(4)
+            one.move(4);
             break;    
     }
 } 
+// 1 s
+// 2 e
+// 3 n
+// 4 w

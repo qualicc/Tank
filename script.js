@@ -24,11 +24,9 @@ class Player {
         this.y = posy;
     }
     getX(){
-        console.log(this.x)
         return this.x;
     }
     getY(){
-        console.log(this.y)
         return this.y;
     }
     moveLeft() {
@@ -112,14 +110,134 @@ class Player {
 class Bullet{
     x;
     y;
-    constructor(posx, posy){
-        x = posx;
-        y = posy;
+    kierunek;
+    hited = false;
+    constructor(posx, posy, k){
+        this.x = posx;
+        this.y = posy;
+        this.kierunek = k;
+    }
+    draw(){
+        if(this.hited === true)
+        {
+            return;
+        }
+        ctx.fillStyle = "orange";
+        switch (this.kierunek) {
+            case 1:
+                ctx.fillRect(this.x+rozmiarPola/2-2,this.y+rozmiarPola,3,5);//DÓŁ
+                break;
+            case 2:
+                ctx.fillRect(this.x+rozmiarPola,this.y+rozmiarPola/2-2,5,3);//PRAWO
+                break;
+            case 3:
+                ctx.fillRect(this.x+rozmiarPola/2-2,this.y-5,3,5);//GÓRA
+                break;
+            case 4:
+                ctx.fillRect(this.x-5,this.y+rozmiarPola/2-2,5,3);//LEWO
+                break;
+        }
+        this.move()
+    }
+    move(){
+        switch (this.kierunek) {
+            case 1:
+                if (this.colider() === true) {
+                    this.y++;
+                }
+                break;
+            case 2:
+                if (this.colider() === true) {
+                    this.x++;
+                }
+                break;
+            case 3:
+                if (this.colider() === true) {
+                    this.y--;
+                }
+                break;
+            case 4:
+                if (this.colider() === true) {
+                    this.x--;
+                }
+                break;
+        }
+    }
+    colider(){
+        if (this.x > 0 && this.x < canvas.width && this.y > 0 && this.y < canvas.height) {
+            return true;
+        }
+        this.hited = true;
+        return false;
+    }
+}
+class Structure{
+    x;
+    y;
+    type;
+    constructor(posx, posy, typex){
+        this.x = posx;
+        this.y = posy;
+        this.type = typex;
+    }
+    colider;
+    shotColider;
+    draw(){
+        switch (this.type) {
+            case "cegla":
+                    ctx.fillStyle = "red";
+                    this.colider = true;
+                    this.shotColider = true;
+                    ctx.fillRect(this.x,this.y,rozmiarPola,rozmiarPola);
+                break;
+            case "woda":
+                    ctx.fillStyle = "blue";
+                    this.colider = true;
+                    this.shotColider = false;
+                    ctx.fillRect(this.x,this.y,rozmiarPola,rozmiarPola);
+                break;
+            case "trawa":
+                    ctx.fillStyle = "green";
+                    this.colider = false;
+                    this.shotColider = false;
+                    ctx.fillRect(this.x,this.y,rozmiarPola,rozmiarPola);
+                break;
+        }
+    }
+    coliding(objx, objy,kierunek){
+        if (this.colider === true){
+            switch (kierunek) {
+                case 1:
+                case 3:
+                    if (objx === this.x &&
+                        (objy === this.y ||
+                            objy + rozmiarPola/2 === this.y ||
+                            objy - rozmiarPola/2 === this.y
+                                )) {
+                            return true
+                    }
+                    break;
+                case 2:
+                case 4:
+                    if (objy === this.y &&
+                        (objx === this.x ||
+                        objx + rozmiarPola/2 === this.x ||
+                        objx - rozmiarPola/2 === this.x
+                            )) {
+                            return true
+                    }
+                    break;
+            }
+            return false;    
+        }
+        return false
     }
 }
 class Bot{
     x;
     y;
+    kierunek = 1;
+    died = false;
     constructor(posx, posy){
         this.x = posx;
         this.y = posy;
@@ -203,11 +321,14 @@ class Bot{
     }
 }
 class Game {
+    structure = [];
     map;
     player;
     bots = [];
+    bullets = [];
     constructor(lvl) {
         this.map = this.loadMap(lvl);
+        this.structure = this.prepareMap();
         // $("canvas").css("height" , this.map.length * rozmiarPola);
         // $("canvas").css("widht" , this.map[1].length * rozmiarPola);
     }
@@ -224,65 +345,112 @@ class Game {
         });
         return map;
     }
+    prepareMap(){
+        let struct = [];
+        for (let j = 0; j < this.map.length; j++) {
+          for (let i = 0; i < this.map[j].length; i++) {
+            switch (this.map[j][i]) {
+              case 1:
+                struct.push(new Structure(i * rozmiarPola, j * rozmiarPola, "cegla"));
+                break;
+              case 2:
+                struct.push(new Structure(i * rozmiarPola, j * rozmiarPola, "woda"));
+                break;
+              case 3:
+                struct.push(new Structure(i * rozmiarPola, j * rozmiarPola, "trawa"));
+                break;
+              case 4:
+                this.bots.push(new Bot(i * rozmiarPola, j * rozmiarPola));
+                break;
+              case 5:
+                this.player = new Player(i * rozmiarPola, j * rozmiarPola);
+                this.player.playerDraw();
+                break;
+            }
+          }
+        }
+        return struct;
+    }
     clear(){
         ctx.clearRect(0, 0, canvas.width, canvas.height); // czyszczenie            
         ctx.fillStyle = "grey";
         ctx.fillRect(0,0,canvas.width,canvas.height);
     }
     draw(){
-        for(var j =0;j < this.map.length; j++){
-            for(var i =0;i < this.map[j].length; i++){
-                switch (this.map[j][i]) {
-                    case 1:
-                        ctx.fillStyle = "red";
-                        ctx.fillRect(i*rozmiarPola,j*rozmiarPola,rozmiarPola,rozmiarPola);
-                        break;
-                    case 2:
-                        ctx.fillStyle = "blue";
-                        ctx.fillRect(i*rozmiarPola,j*rozmiarPola,rozmiarPola,rozmiarPola);
-                        break;
-                    case 3:
-                        ctx.fillStyle = "green";
-                        ctx.fillRect(i*rozmiarPola,j*rozmiarPola,rozmiarPola,rozmiarPola);
-                        break;               
-                    case 4:
-                        this.bots.push(new Bot(i*rozmiarPola,j*rozmiarPola))
-                        ctx.fillStyle = "grey";//boty
-                        this.map[j][i] = 6;
-                        ctx.fillRect(i*rozmiarPola,j*rozmiarPola,rozmiarPola,rozmiarPola);
-                        break;
-                    case 5:
-                        ctx.fillStyle = "grey";
-                        ctx.fillRect(i*rozmiarPola,j*rozmiarPola,rozmiarPola,rozmiarPola);
-                        this.player = new Player(i*rozmiarPola,j*rozmiarPola);
-                        this.player.playerDraw();
-                        this.map[j][i] = 6;
-                        break;
-                }
-            }
-        }
+        this.structure.forEach(element => {
+            element.draw()
+        });
+        this.bullets.forEach(element => {
+            element.draw()
+        })
     }
     update(){
         this.clear();
         this.draw();
-        this.bots.forEach(element => element.playerDraw());
+        for (let i = 0; i < this.bots.length; i++) {
+            this.bots[i].playerDraw();
+          }
         this.player.playerDraw();
     }
     move(kierunek) {
+        let checker = false;
           switch(kierunek) {
             case 1: // lewa strzałka
-              this.player.moveLeft();
+                this.structure.forEach(element => {
+                    if(element.coliding(this.player.x - rozmiarPola, this.player.y,1) === true){
+                        checker = true;
+                        return;
+                    }
+                }) 
+                if(checker === false){
+                    this.player.moveLeft();
+                }
+                
               break;
             case 2: // górna strzałka
-              this.player.moveUp();
+                this.structure.forEach(element => {
+                if(element.coliding(this.player.x, this.player.y - rozmiarPola,2) === true){
+                        checker = true;
+                        return;
+                    }
+                }) 
+                if(checker === false){
+                    this.player.moveUp();
+                }               
+                
               break;
             case 3: // prawa strzałka
-              this.player.moveRight();
+                this.structure.forEach(element => {
+                if(element.coliding(this.player.x + rozmiarPola, this.player.y,3) === true){
+                        checker = true;
+                        return;
+                    }
+                }) 
+                if(checker === false){
+                    this.player.moveRight();
+                }
+                
               break;
             case 4: // dolna strzałka
-              this.player.moveDown();
+                this.structure.forEach(element => {
+                if(element.coliding(this.player.x, this.player.y + rozmiarPola,4) === true){
+                        checker = true;
+                        return;
+                    }
+                }) 
+                if(checker === false){
+                    this.player.moveDown();
+                }
+
               break;
         }      
+    }
+    createBullet(objx = -30, objy = -30)
+    {
+        if (objx === -30 && objy === -30) {
+            this.bullets.push(new Bullet(this.player.x,this.player.y,this.player.kierunek))
+        }
+        
     }
 }
 
@@ -304,7 +472,10 @@ function onKeyDown(event){
             break;
         case "KeyS":
             one.move(4);
-            break;    
+            break;   
+        case"Space":
+            one.createBullet();
+            break
     }
 } 
 // 1 s

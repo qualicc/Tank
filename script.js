@@ -164,7 +164,115 @@ class Bullet{
         }
     }
     colider(){
-        if (this.x > 0 && this.x < canvas.width && this.y > 0 && this.y < canvas.height) {
+        if (this.x >= 0 && this.x <= canvas.width && this.y >= 0 && this.y <= canvas.height) {
+            one.structure.forEach(element => {
+                if(element.shotColider === true && element.hited === false)
+                {
+                    switch (this.kierunek) {
+                        case 1:
+                            if (this.y + 1 + rozmiarPola === element.y &&
+                                (this.x === element.x ||
+                                this.x + rozmiarPola/2 === element.x ||
+                                this.x - rozmiarPola/2 === element.x
+                                )) {
+                                    element.hited = true;
+                                    this.hited = true;
+                                    return false;
+                                }
+                            break;
+                        case 2:
+                            if (this.x + 1 + rozmiarPola === element.x &&
+                                (this.y === element.y ||
+                                this.y + rozmiarPola/2 === element.y ||
+                                this.y - rozmiarPola/2 === element.y
+                                )) {
+                                    element.hited = true;
+                                    this.hited = true;
+                                    return false;
+                                }
+                               
+                            break;
+                        case 3:
+                            if (this.y - 1 - rozmiarPola === element.y &&
+                                (this.x === element.x ||
+                                this.x + rozmiarPola/2 === element.x ||
+                                this.x - rozmiarPola/2 === element.x
+                                )) {
+                                    element.hited = true;
+                                    this.hited = true;
+                                    return false;
+                                }
+
+                            break;
+                        case 4:
+                            if (this.x - 1 - rozmiarPola === element.x &&
+                                (this.y === element.y ||
+                                this.y + rozmiarPola/2 === element.y ||
+                                this.y - rozmiarPola/2 === element.y
+                                )) {
+                                    element.hited = true;
+                                    this.hited = true;
+                                    return false;
+                                }
+
+                            break;
+                    }
+                }
+            })
+            one.bots.forEach(element => {
+                if(element.died === false)
+                {
+                    switch (this.kierunek) {
+                        case 1:
+                            if (this.y + 1 + rozmiarPola === element.y &&
+                                (this.x === element.x ||
+                                this.x + rozmiarPola/2 === element.x ||
+                                this.x - rozmiarPola/2 === element.x
+                                )) {
+                                    element.died = true;
+                                    this.hited = true;
+                                    return false;
+                                }
+                            break;
+                        case 2:
+                            if (this.x + 1 + rozmiarPola === element.x &&
+                                (this.y === element.y ||
+                                this.y + rozmiarPola/2 === element.y ||
+                                this.y - rozmiarPola/2 === element.y
+                                )) {
+                                    element.died = true;
+                                    this.hited = true;
+                                    return false;
+                                }
+                               
+                            break;
+                        case 3:
+                            if (this.y - 1 - rozmiarPola === element.y &&
+                                (this.x === element.x ||
+                                this.x + rozmiarPola/2 === element.x ||
+                                this.x - rozmiarPola/2 === element.x
+                                )) {
+                                    element.died = true;
+                                    this.hited = true;
+                                    return false;
+                                }
+
+                            break;
+                        case 4:
+                            if (this.x - 1 - rozmiarPola === element.x &&
+                                (this.y === element.y ||
+                                this.y + rozmiarPola/2 === element.y ||
+                                this.y - rozmiarPola/2 === element.y
+                                )) {
+                                    element.died = true;
+                                    this.hited = true;
+                                    return false;
+                                }
+
+                            break;
+                    }
+                }
+            })
             return true;
         }
         this.hited = true;
@@ -179,27 +287,39 @@ class Structure{
         this.x = posx;
         this.y = posy;
         this.type = typex;
+        switch (typex) {
+            case "cegla":
+                this.colider = true;
+                this.shotColider = true;
+                break;
+            case "woda":
+                this.colider = true;
+                this.shotColider = false;
+                break;
+            case "trawa":
+                this.colider = false;
+                this.shotColider = false;
+                break;
+        }
     }
     colider;
     shotColider;
+    hited = false;
     draw(){
+        if (this.hited === true) {
+            return
+        }
         switch (this.type) {
             case "cegla":
                     ctx.fillStyle = "red";
-                    this.colider = true;
-                    this.shotColider = true;
                     ctx.fillRect(this.x,this.y,rozmiarPola,rozmiarPola);
                 break;
             case "woda":
                     ctx.fillStyle = "blue";
-                    this.colider = true;
-                    this.shotColider = false;
                     ctx.fillRect(this.x,this.y,rozmiarPola,rozmiarPola);
                 break;
             case "trawa":
                     ctx.fillStyle = "green";
-                    this.colider = false;
-                    this.shotColider = false;
                     ctx.fillRect(this.x,this.y,rozmiarPola,rozmiarPola);
                 break;
         }
@@ -214,7 +334,7 @@ class Structure{
                             objy + rozmiarPola/2 === this.y ||
                             objy - rozmiarPola/2 === this.y
                                 )) {
-                            return true
+                            return true //blokuje ruch
                     }
                     break;
                 case 2:
@@ -224,7 +344,7 @@ class Structure{
                         objx + rozmiarPola/2 === this.x ||
                         objx - rozmiarPola/2 === this.x
                             )) {
-                            return true
+                            return true //blokuje ruch
                     }
                     break;
             }
@@ -319,6 +439,24 @@ class Bot{
     
         }
     }
+    detect(){
+        if (this.x === one.player.x ||
+            this.y === one.player.y) {
+            if(this.x === one.player.x && this.y < one.player.y){
+                one.bullets.push(new Bullet(this.x,this.y,1))
+                console.log("f1")
+            }else if(this.x === one.player.x && this.y > one.player.y){
+                one.bullets.push(new Bullet(this.x,this.y,3))
+                console.log("f3")
+            }else if(this.y === one.player.y && this.x < one.player.x){
+                one.bullets.push(new Bullet(this.x,this.y,2))
+                console.log("f2")
+            }else if(this.y === one.player.y && this.x > one.player.x){
+                one.bullets.push(new Bullet(this.x,this.y,4))
+                console.log("f4")
+            }
+        }
+    }
 }
 class Game {
     structure = [];
@@ -381,15 +519,19 @@ class Game {
             element.draw()
         });
         this.bullets.forEach(element => {
-            element.draw()
+                element.draw()
+        })
+        this.bots.forEach(element => {
+            if(element.died === false){
+                 element.playerDraw();
+                 element.detect()
+            }
         })
     }
     update(){
         this.clear();
         this.draw();
-        for (let i = 0; i < this.bots.length; i++) {
-            this.bots[i].playerDraw();
-          }
+
         this.player.playerDraw();
     }
     move(kierunek) {
@@ -397,7 +539,7 @@ class Game {
           switch(kierunek) {
             case 1: // lewa strzałka
                 this.structure.forEach(element => {
-                    if(element.coliding(this.player.x - rozmiarPola, this.player.y,1) === true){
+                    if(element.coliding(this.player.x - rozmiarPola, this.player.y,1) === true && element.hited === false){
                         checker = true;
                         return;
                     }
@@ -405,11 +547,11 @@ class Game {
                 if(checker === false){
                     this.player.moveLeft();
                 }
-                
+                this.player.kierunek = 4;
               break;
             case 2: // górna strzałka
                 this.structure.forEach(element => {
-                if(element.coliding(this.player.x, this.player.y - rozmiarPola,2) === true){
+                if(element.coliding(this.player.x, this.player.y - rozmiarPola,2) === true && element.hited === false){
                         checker = true;
                         return;
                     }
@@ -417,11 +559,11 @@ class Game {
                 if(checker === false){
                     this.player.moveUp();
                 }               
-                
+                this.player.kierunek = 3;
               break;
             case 3: // prawa strzałka
                 this.structure.forEach(element => {
-                if(element.coliding(this.player.x + rozmiarPola, this.player.y,3) === true){
+                if(element.coliding(this.player.x + rozmiarPola, this.player.y,3) === true && element.hited === false){
                         checker = true;
                         return;
                     }
@@ -429,11 +571,11 @@ class Game {
                 if(checker === false){
                     this.player.moveRight();
                 }
-                
+                this.player.kierunek = 2;
               break;
             case 4: // dolna strzałka
                 this.structure.forEach(element => {
-                if(element.coliding(this.player.x, this.player.y + rozmiarPola,4) === true){
+                if(element.coliding(this.player.x, this.player.y + rozmiarPola,4) === true && element.hited === false){
                         checker = true;
                         return;
                     }
@@ -441,7 +583,7 @@ class Game {
                 if(checker === false){
                     this.player.moveDown();
                 }
-
+                this.player.kierunek = 1;
               break;
         }      
     }
@@ -452,8 +594,11 @@ class Game {
         }
         
     }
+    lost(){
+        clearInterval(updateInterval)
+        alert("Przegrałeś lamusie");
+    }
 }
-
 let one = new Game("test");
 one.draw();
 

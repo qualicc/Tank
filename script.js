@@ -13,6 +13,7 @@ class Player {
     y;  
     kierunek = 1;
     actualStep = 0;
+    died = false;
     constructor(posx, posy){
         this.x = posx;
         this.y = posy;
@@ -273,6 +274,55 @@ class Bullet{
                     }
                 }
             })
+            switch (this.kierunek) {
+                case 1:
+                    if (this.y + 1 + rozmiarPola === one.player.y &&
+                        (this.x === one.player.x ||
+                        this.x + rozmiarPola/2 === one.player.x ||
+                        this.x - rozmiarPola/2 === one.player.x
+                        )) {
+                            one.player.died = true;
+                            this.hited = true;
+                            return false;
+                        }
+                    break;
+                case 2:
+                    if (this.x + 1 + rozmiarPola === one.player.x &&
+                        (this.y === one.player.y ||
+                        this.y + rozmiarPola/2 === one.player.y ||
+                        this.y - rozmiarPola/2 === one.player.y
+                        )) {
+                            one.player.died = true;
+                            this.hited = true;
+                            return false;
+                        }
+                       
+                    break;
+                case 3:
+                    if (this.y - 1 - rozmiarPola === one.player.y &&
+                        (this.x === one.player.x ||
+                        this.x + rozmiarPola/2 === one.player.x ||
+                        this.x - rozmiarPola/2 === one.player.x
+                        )) {
+                            one.player.died = true;
+                            this.hited = true;
+                            return false;
+                        }
+
+                    break;
+                case 4:
+                    if (this.x - 1 - rozmiarPola === one.player.x &&
+                        (this.y === one.player.y ||
+                        this.y + rozmiarPola/2 === one.player.y ||
+                        this.y - rozmiarPola/2 === one.player.y
+                        )) {
+                            one.player.died = true;
+                            this.hited = true;
+                            return false;
+                        }
+
+                    break;
+            }
             return true;
         }
         this.hited = true;
@@ -358,6 +408,8 @@ class Bot{
     y;
     kierunek = 1;
     died = false;
+    timer = 0;
+    timerShot = 0;
     constructor(posx, posy){
         this.x = posx;
         this.y = posy;
@@ -366,25 +418,33 @@ class Bot{
         if (this.x > 0) {
           this.x -= rozmiarPola/2;
           this.kierunek = 4;
+          return true;
         }
+        return false;
     }
     moveRight() {
         if (this.x + rozmiarPola < canvas.width) {
           this.x += rozmiarPola/2;
           this.kierunek = 2;
+          return true;
         }
+        return false;
      }
     moveUp() {
         if (this.y > 0) {
           this.y -= rozmiarPola/2;
           this.kierunek = 3;
+          return true;
         }
+        return false;
     }
     moveDown() {
         if (this.y + rozmiarPola < canvas.height) {
           this.y += rozmiarPola/2;
           this.kierunek = 1;
+          return true;
         }
+        return false;
     }
     playerDraw(){
         var color = "#6b6969";
@@ -440,22 +500,88 @@ class Bot{
         }
     }
     detect(){
-        if (this.x === one.player.x ||
-            this.y === one.player.y) {
+        if ((this.x === one.player.x ||
+            this.y === one.player.y) &&
+            this.timerShot > 30) {
             if(this.x === one.player.x && this.y < one.player.y){
                 one.bullets.push(new Bullet(this.x,this.y,1))
-                console.log("f1")
+                this.timerShot = 0;
             }else if(this.x === one.player.x && this.y > one.player.y){
                 one.bullets.push(new Bullet(this.x,this.y,3))
-                console.log("f3")
+                this.timerShot = 0;
             }else if(this.y === one.player.y && this.x < one.player.x){
                 one.bullets.push(new Bullet(this.x,this.y,2))
-                console.log("f2")
+                this.timerShot = 0;
             }else if(this.y === one.player.y && this.x > one.player.x){
                 one.bullets.push(new Bullet(this.x,this.y,4))
-                console.log("f4")
+                this.timerShot = 0;
             }
+        }else{
+            this.timerShot++;
         }
+        
+    }
+    randomMove(){
+        if (this.timer > 50) {
+            let random = Math.round(Math.random() * (4 - 1) + 1);
+            let checker = false;
+            switch(random) {
+              case 1: // lewa strzałka
+                  one.structure.forEach(element => {
+                      if(element.coliding(this.x - rozmiarPola, this.y,1) === true && element.hited === false){
+                          checker = true;
+                          return;
+                      }
+                  }) 
+                  if(checker === false){
+                      this.moveLeft();
+                  }
+                  this.kierunek = 4;
+                break;
+              case 2: // górna strzałka
+                  one.structure.forEach(element => {
+                  if(element.coliding(this.x, this.y - rozmiarPola,2) === true && element.hited === false){
+                          checker = true;
+                          return;
+                      }
+                  }) 
+                  if(checker === false){
+                      this.moveUp();
+                  }               
+                  this.kierunek = 3;
+                break;
+              case 3: // prawa strzałka
+                  one.structure.forEach(element => {
+                  if(element.coliding(this.x + rozmiarPola, this.y,3) === true && element.hited === false){
+                          checker = true;
+                          return;
+                      }
+                  }) 
+                  if(checker === false){
+                      this.moveRight();
+                  }
+                  this.kierunek = 2;
+                break;
+              case 4: // dolna strzałka
+                  one.structure.forEach(element => {
+                  if(element.coliding(this.x, this.y + rozmiarPola,4) === true && element.hited === false){
+                          checker = true;
+                          return;
+                      }
+                  }) 
+                  if(checker === false){
+                      this.moveDown();
+                  }
+                  this.kierunek = 1;
+                break;
+          }      
+            this.timer = 0;         
+        }
+        else
+        {
+            this.timer++;
+        }
+
     }
 }
 class Game {
@@ -524,15 +650,27 @@ class Game {
         this.bots.forEach(element => {
             if(element.died === false){
                  element.playerDraw();
-                 element.detect()
+                 element.detect();
+                element.randomMove();
             }
         })
     }
     update(){
         this.clear();
         this.draw();
-
         this.player.playerDraw();
+        let botDeadCounter = 0;
+        this.bots.forEach(element => {
+            if(element.died === true){
+                botDeadCounter++;
+            }
+        })
+        if (botDeadCounter === this.bots.length) {
+            this.win()
+        }
+        if(this.player.died === true){
+            this.lost();
+        }
     }
     move(kierunek) {
         let checker = false;
@@ -597,6 +735,10 @@ class Game {
     lost(){
         clearInterval(updateInterval)
         alert("Przegrałeś lamusie");
+    }
+    win(){
+        clearInterval(updateInterval)
+        alert("Wygrałeś");   
     }
 }
 let one = new Game("test");
